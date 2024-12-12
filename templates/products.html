@@ -49,6 +49,40 @@
             </div>
         </div>
     </div>
+
+    <h1>Danh sách sản phẩm</h1>
+
+    <div>
+        <h2>Danh mục</h2>
+        <ul>
+            <li><a href="{% url 'product_list' %}">Tất cả sản phẩm</a></li>
+            {% for cat in categories %}
+                <li>
+                    <a href="{% url 'product_list_by_category' cat.slug %}">
+                        {{ cat.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <h2>Sản phẩm{% if category %} trong danh mục: {{ category.name }}{% endif %}</h2>
+        <ul>
+            {% for product in products %}
+                <li>
+                    <a href="{% url 'product_detail' product.slug %}">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" width="150">
+                        <h3>{{ product.name }}</h3>
+                        <p>Giá: {{ product.price }} VND</p>
+                        <p>{% if product.is_in_stock %}Còn hàng{% else %}Hết hàng{% endif %}</p>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
     {% endblock content %}
+
+
 </body>
 </html>
