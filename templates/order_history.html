@@ -1,0 +1,17 @@
+{% extends "index.html" %}
+
+{% block content %}
+  <h2>Order History</h2>
+  <ul>
+    {% for entry in history %}
+      <li>
+        <strong>Order ID:</strong> {{ entry.order.id }}<br>
+        <strong>Status:</strong> {{ entry.get_status_display }}<br>
+        <strong>Updated At:</strong> {{ entry.updated_at }}
+      </li>
+      <hr>
+    {% empty %}
+      <p>No order history available.</p>
+    {% endfor %}
+  </ul>
+{% endblock %}
