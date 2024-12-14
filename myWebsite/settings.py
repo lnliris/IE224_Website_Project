@@ -31,6 +31,8 @@ AUTH_USER_MODEL = 'users.User'
 
 # Application definition
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

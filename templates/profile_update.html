@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Profile</title>
+</head>
+<body>
+    <h2>Cập nhật thông tin của bạn</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Cập nhật</button>
+    </form>
+
+    {% if success_message %}
+        <p class="success">{{ success_message }}</p>
+    {% endif %}
+
+    <a href="{% url 'profile' %}">Hủy</a>
+</body>
+</html>
