@@ -1,21 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Update Profile</title>
-</head>
-<body>
-    <h2>Cập nhật thông tin của bạn</h2>
+{% extends 'base.html' %}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Cập nhật</button>
-    </form>
+{% block page_title %}
+    <title>Danh sách sản phẩm</title>
+{% endblock page_title %}
 
-    {% if success_message %}
-        <p class="success">{{ success_message }}</p>
-    {% endif %}
-
-    <a href="{% url 'profile' %}">Hủy</a>
-</body>
-</html>
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center" style="height: 75vh;">
+        <div class="card shadow-sm w-50">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Cập nhật thông tin của bạn</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="first_name">Họ:</label>
+                        <input type="text" id="first_name" name="first_name" class="form-control" value="{{ form.first_name.value }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Tên:</label>
+                        <input type="text" id="last_name" name="last_name" class="form-control" value="{{ form.last_name.value }}" required>
+                    </div>
+                    {% if success_message %}
+                        <div class="alert alert-success text-center">
+                            {{ success_message }}
+                        </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary btn-block">Cập nhật</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="{% url 'profile' %}">Hủy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

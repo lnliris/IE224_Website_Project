@@ -1,47 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <!-- Bootstrap CSS -->
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+{% extends "base.html" %}
 
-</head>
-<body>
-    <!-- Các thành chung của các trang-->
-    <!-- Bootstrap Navbar code -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="">Ecom</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="">Store <span class="sr-only">(current)</span></a>
-            </li>
-        
-            </ul>
-            <div class="form-inline my-2 my-lg-0">
-                <a href="#"class="btn btn-warning">Login</a>
-                <a href="">
-                    <img  id="cart-icon" src="{% static 'images/cart.png' %}">
-                </a>
-                <p id="cart-total">0</p>
-        
-            </div>
-        </div>
-    </nav>
-    <hr>
+{% block page_title %}
+    <title>Home</title>
+{% endblock page_title %}
+
+{% block content %}
     <div class="container">
         <br>
-        {% block content %}
-        {% endblock content %}
+        Chào mừng bạn đến với shop bán giày ZZZ
     </div>
-</body>
-</html>
+{% endblock content %}

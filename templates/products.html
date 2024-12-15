@@ -1,20 +1,17 @@
-<!-- Kế thừa từ trang home -->
-{% extends 'index.html' %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+{% extends 'base.html' %}
+
+{% block page_title %}
+    <title>Danh sách sản phẩm</title>
+{% endblock page_title %}
+{% block addin %}
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-</head>
-<body>
-    <h3>Đây là trang sản phẩm</h3>
-    {% load static %}
-    <img src="{% static 'images/cart.png' %}">
-    {% block content %}
+{% endblock addin%}
+
+<h3>Đây là trang sản phẩm</h3>
+{% load static %}
+<img src="{% static 'images/cart.png' %}">
+
+{% block content %}
     <div class="row">
         <div class="col-lg-4">
             <div class="box-element product">
@@ -25,7 +22,7 @@
                 <h4 style="display: inline; float: right"><strong>200.000 đ</strong></h4>
             </div>
         </div>
-    
+
         <div class="col-lg-4">
             <div class="box-element product">
                 <h6><strong>Product</strong></h6>
@@ -35,7 +32,7 @@
                 <h4 style="display: inline; float: right"><strong>200.000 đ</strong></h4>
             </div>
         </div>
-    
+
         <div class="col-lg-4">
             <div class="box-element product">
                 <h6><strong>Product</strong></h6>
@@ -46,6 +43,4 @@
             </div>
         </div>
     </div>
-    {% endblock content %}
-</body>
-</html>
+{% endblock content %}

@@ -37,9 +37,6 @@ class RegisterForms(forms.Form):
         if password != re_password:
             raise forms.ValidationError("Mật khẩu nhập lại không khớp")
         return cleaned_data
-
-
-
 class LoginForms(forms.Form):
     username = forms.CharField(label="Username or Email", min_length=5,
                                error_messages={

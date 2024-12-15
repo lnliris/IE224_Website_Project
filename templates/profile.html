@@ -1,14 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Profile</title>
-</head>
-<body>
-    <h2>Welcome, {{ user.first_name }}</h2>
-    <p>Here is your profile page.</p>
+{% extends "base.html" %}
 
-    <a href="{% url 'profile_update' %}">Update Profile</a>
-    
-    <a href="{% url 'logout' %}">Logout</a>
-</body>
-</html>
+{% block page_title %}
+    <title>Hồ sơ cá nhân</title>
+{% endblock page_title %}
+
+{% block content %}
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-4 border-right">
+                <h2>Welcome, {{ user.first_name }}</h2>
+                <p>Here is your dashboard.</p>
+
+                <div class="list-group">
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Phone Number:</strong> {{ user.phone_number }}</p>
+                    <a href="{% url 'profile_update' %}" class="list-group-item list-group-item-action">Update Profile</a>
+                    <a href="{% url 'logout' %}" class="list-group-item list-group-item-action">Logout</a>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <h3>Lịch sử đặt hàng</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <p><strong>Order ID:</strong> #12345</p>
+                        <p><strong>Date:</strong> 2024-12-15</p>
+                        <p><strong>Total:</strong> $250.00</p>
+                        <p><strong>Status:</strong> Shipped</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

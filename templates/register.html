@@ -1,24 +1,51 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-</head>
-<body>
-    <h1>Đăng ký</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Register</button>
-    </form>
+{% extends "base.html" %}
 
-    {% if success_message %}
-        <p style="color: green;">{{ success_message }}</p>
-    {% endif %}
+{% block page_title %}
+    <title>Đăng ký</title>
+{% endblock page_title %}
 
-    {% if error_message %}
-        <p style="color: red;">{{ error_message }}</p>
-    {% endif %}
-
-    Đã có tài khoản? <a href="/users/login">Đăng nhập tại đây.</a>
-</body>
-</html>
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center" style="height: 75vh;">
+        <div class="card shadow-sm w-50">
+            <div class="card-body">
+                <h4 class="card-title text-center mb-4">Đăng ký</h4>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="username">Tên đăng nhập:</label>
+                        <input type="text" id="username" name="username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="first_name">Tên:</label>
+                        <input type="text" id="first_name" name="first_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Họ:</label>
+                        <input type="text" id="last_name" name="last_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mật khẩu:</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="re_password">Xác nhận Mật khẩu:</label>
+                        <input type="password" id="re_password" name="re_password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Đăng ký</button>
+                </form>
+                {% if error_message %}
+                    <div class="alert alert-danger mt-3">
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+                <div class="text-center mt-3">
+                    <p>Đã có tài khoản? <a href="{% url 'login' %}">Đăng nhập tại đây</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
