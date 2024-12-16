@@ -1,7 +1,9 @@
 from django.contrib import admin
 
 from .models import *
-from .models import Category, Product, Variant
+
+
+
 class InStockFilter(admin.SimpleListFilter):
     title = 'Còn hàng'
     parameter_name = 'in_stock'
@@ -17,10 +19,14 @@ class InStockFilter(admin.SimpleListFilter):
             return queryset.filter(stock__lte=0)
         return queryset
 @admin.register(Category)
+
+
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
 @admin.register(Product)
+
+
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'stock', 'is_in_stock', 'slug')
     list_filter = ('category', InStockFilter)  # Sử dụng bộ lọc tùy chỉnh
@@ -30,6 +36,7 @@ class ProductAdmin(admin.ModelAdmin):
     is_in_stock.boolean = True  # Hiển thị icon đúng/sai
     is_in_stock.short_description = 'Còn hàng'
 @admin.register(Variant)
+
 class VariantAdmin(admin.ModelAdmin):
     list_display = ('product', 'name', 'value', 'stock')
     list_filter = ('product', 'name')

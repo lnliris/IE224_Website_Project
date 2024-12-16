@@ -27,6 +27,11 @@ class Product(models.Model):
     image = models.ImageField(null=True, blank=True, upload_to='products/')  # Ảnh sản phẩm
     stock = models.PositiveIntegerField(default=0)  # Số lượng sản phẩm trong kho
 
+    # Các trường ảnh phụ
+    image_1 = models.ImageField(upload_to='products/', null=True, blank=True)
+    image_2 = models.ImageField(upload_to='products/', null=True, blank=True)
+    image_3 = models.ImageField(upload_to='products/', null=True, blank=True)
+
     def save(self, *args, **kwargs):
         if not self.slug:  # Tự động tạo slug nếu chưa có
             self.slug = slugify(self.name)
