@@ -26,7 +26,7 @@ class Product(models.Model):
     description = models.TextField(null=True, blank=True)  # Mô tả sản phẩm
     image = models.ImageField(null=True, blank=True, upload_to='products/')  # Ảnh sản phẩm
     stock = models.PositiveIntegerField(default=0)  # Số lượng sản phẩm trong kho
-     
+
     def save(self, *args, **kwargs):
         if not self.slug:  # Tự động tạo slug nếu chưa có
             self.slug = slugify(self.name)
@@ -34,7 +34,9 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
-    
+    @property
+    def formatted_price(self):
+        return f"{self.price:,.0f} VND"
     @property
     def is_in_stock(self):
         """Kiểm tra xem sản phẩm còn hàng hay không"""
