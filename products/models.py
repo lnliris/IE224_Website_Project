@@ -49,13 +49,25 @@ class Product(models.Model):
 
 # Model Biến thể sản phẩm
 class Variant(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')  # Liên kết với sản phẩm
-    name = models.CharField(max_length=100)  # Tên biến thể (ví dụ: Màu sắc, Kích thước)
-    value = models.CharField(max_length=100)  # Giá trị của biến thể (ví dụ: Đỏ, Xanh, Lớn, Nhỏ)
-    stock = models.PositiveIntegerField(default=0)  # Số lượng sản phẩm trong kho cho biến thể
+    PRODUCT_TYPE_CHOICES = (
+        ('Official', 'Chính hãng'),
+        ('Pro', 'Pro'),
+        ('Regular', 'Bình thường'),
+    )
+
+    MATERIAL_CHOICES = (
+        ('Natural Rubber', 'Cao su tự nhiên'),
+        ('Synthetic Rubber', 'Cao su nhân tạo'),
+        ('EVA', 'EVA'),
+        ('Carbon Fiber', 'Sợi carbon'),
+    )
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')  # Link to the product
+    type = models.CharField(max_length=50, choices=PRODUCT_TYPE_CHOICES, verbose_name="Loại sản phẩm")
+    color = models.CharField(max_length=100)  # Variant value (e.g., Red, Green, Large, Small)
+    material = models.CharField(max_length=50, choices=MATERIAL_CHOICES, verbose_name="Chất liệu")
+
     def __str__(self):
-        return f"{self.name}: {self.value} ({self.product.name})"
-    @property
-    def is_in_stock(self):
-        """Kiểm tra xem biến thể còn hàng hay không"""
-        return self.stock > 0
+        return f"{self.type}: {self.color} ({self.material}) - {self.product.name}"
+    
+0

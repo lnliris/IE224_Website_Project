@@ -196,9 +196,40 @@ h1,h2,h3,h4,h5,h6{
 
 .search-filter button {
     padding: 5px 10px;
-    background-color: #007bff;
+    background-color: #f23400;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+}
+
+/* Dropdown cho product_type */
+.custom-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Checkbox cho material và color */
+.custom-checkbox input {
+    margin-right: 8px;
+}
+
+.custom-checkbox label {
+    font-size: 14px;
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+/* Input cho year */
+.custom-input {
+    width: 50%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    display: block;
+    margin-bottom: 15px;
 }

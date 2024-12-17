@@ -21,6 +21,7 @@
         <input type="number" name="max_price" placeholder="Giá cao nhất" step="100000" value="{{ form.max_price.value }}">
         <button type="submit">Lọc</button>
     </form>
+    
 </div>
 
 
@@ -37,6 +38,11 @@
                 {% endfor %}
             </div>
         </div>
+        <form method="GET" action="">
+            <h3>Lọc sản phẩm</h3>
+            {{ filter_form.as_p }}  
+            <button type="submit">Lọc</button>
+        </form>
     </div>
 
 

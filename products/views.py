@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views import View
 from django.shortcuts import render, get_object_or_404
 from .models import Category, Product
-from .form import SearchForm
+from .form import SearchForm, FilterForm
 from django.db.models import Q
 
 
@@ -17,19 +17,42 @@ def product_list(request, category_slug=None):
     else:
         category = None  # Không có category_slug, sẽ hiển thị toàn bộ sản phẩm
 
+    # Xử lý form lọc
+    filter_form = FilterForm(request.GET)
+    if filter_form.is_valid():
+        selected_colors = filter_form.cleaned_data.get('color')
+        if selected_colors:
+            products = products.filter(variants__color__in=selected_colors)
+
+        selected_materials = filter_form.cleaned_data.get('material')
+        if selected_materials:
+            products = products.filter(variants__material__in=selected_materials)
+
+        selected_type = filter_form.cleaned_data.get('product_type')
+        if selected_type:
+            products = products.filter(variants__type=selected_type)
+
     
     context = {
         'category': category,
         'categories': categories,
         'products': products,
+        'filter_form': filter_form,  # Truyền filter_form vào context
     }
 
     return render(request, 'products.html', context)
+
+
 
 def product_detail(request, product_slug):
     product = Product.objects.get(slug=product_slug)
     context = {'product': product}
     return render(request, 'product_detail.html', context)
+
+def index(request):
+    products = Product.objects.all()  # Hoặc query phù hợp với ứng dụng của bạn
+    categories = Category.objects.all()  # Nếu bạn cũng muốn truyền các danh mục
+    return render(request, 'index.html', {'products': products, 'categories': categories})
 
 class ProductsView(View):
     
@@ -53,13 +76,29 @@ class ProductsView(View):
             if max_price is not None:
                 products = products.filter(price__lte=max_price)  # Lọc giá <= max_price
 
-        print("Tất cả sản phẩm:", Product.objects.all())  # Debug tất cả sản phẩm
-        print("Sản phẩm còn hàng:", products)  # Debug sản phẩm có stock > 0
+        # Xử lý form lọc
+        filter_form = FilterForm(request.GET)
+        if filter_form.is_valid():
+            # Lọc theo màu sắc
+            selected_colors = filter_form.cleaned_data.get('color')
+            if selected_colors:
+                products = products.filter(variants__color__in=selected_colors)
+
+            # Lọc theo chất liệu
+            selected_materials = filter_form.cleaned_data.get('material')
+            if selected_materials:
+                products = products.filter(variants__material__in=selected_materials)
+
+            # Lọc theo loại sản phẩm
+            selected_type = filter_form.cleaned_data.get('product_type')  # Đúng key của form
+            if selected_type:
+                products = products.filter(variants__type=selected_type)
 
         context = {
             'products': products,
             'categories': categories,
-        'form': form,  # Truyền form vào context
+            'search_form': form,  # Truyền form tìm kiếm vào context
+            'filter_form': filter_form,  # Truyền form lọc vào context
         }
         return render(request, 'products.html', context)
 

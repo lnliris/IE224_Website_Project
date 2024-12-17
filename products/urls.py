@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import ProductsView, product_detail, product_list
-from . import views
+from .views import ProductsView, product_detail, product_list, index
+
 
 urlpatterns = [
     path('', ProductsView.as_view(), name='products'),  # Trang danh sách sản phẩm
