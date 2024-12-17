@@ -1,0 +1,33 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: url('/static/images/home_bg.png') no-repeat center center/cover;
+    color: white;
+    height: 100vh;
+}
+.content {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+    text-align: right;
+    padding-right: 2rem;
+}
+.content div {
+    max-width: 500px;
+}
+.content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+}
+.content p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+}
+.btn-start {
+    background-color: lightcoral;
+    color: white;
+    padding: 10px 30px;
+    text-decoration: none;
+    border-radius: 5px;
+}
