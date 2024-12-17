@@ -2,15 +2,88 @@ body{
 	background-color: hsl(0, 0%, 98%);
 }
 
+
 h1,h2,h3,h4,h5,h6{
 	color:hsl(0, 0%, 30%);
 }
 
+.grid_container{
+	display: grid;
+	grid-template-columns: 1fr 3fr;
+}
+
+.item_grid_container{
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: 20px;
+}
+
 .box-element{
+	/* height: 350px; */
+
 	box-shadow:hsl(0, 0%, 80%) 0 0 16px;
 	background-color: #fff;
 	border-radius: 4px;
 	padding: 10px;
+}
+
+.box-element h4{
+	color: red;
+}
+
+.categories ul{
+	list-style: none;
+}
+
+.dropdown {
+	position: relative;
+	display: inline-block;
+}
+
+.dropdown-btn {
+	width: 200px;
+	background-color: #007bff;
+	color: white;
+	padding: 10px 15px;
+	border: none;
+	text-align: left;
+	cursor: pointer;
+	/* border-radius: 5px; */
+	font-size: 16px;
+}
+
+.dropdown-btn a{
+	color: white;
+	text-decoration: none;
+}
+
+.dropdown-btn:hover {
+	background-color: #0056b3;
+}
+
+.dropdown-content {
+	display: none;
+	position: absolute;
+	background-color: #f9f9f9;
+	min-width: 200px;
+	box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+	z-index: 1;
+	border-radius: 5px;
+}
+
+.dropdown-content a {
+	color: black;
+	padding: 10px 15px;
+	text-decoration: none;
+	display: block;
+}
+
+.dropdown-content a:hover {
+	background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+	display: block;
 }
 
 .thumbnail{
@@ -21,8 +94,11 @@ h1,h2,h3,h4,h5,h6{
     box-shadow: -1px -3px 5px -2px rgba(214,214,214,1);
 }
 
-.product{
-	border-radius: 0 0 4px 4px;
+
+.product img{
+	/* width: 150px; */
+	height: 150px;
+	background-size: cover;
 }
 
 .bg-dark{
@@ -96,4 +172,33 @@ h1,h2,h3,h4,h5,h6{
 
 .hidden{
 	display: none!important;
+}
+
+.search-filter {
+	/* margin: 0 auto; */
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+	/* align-items: center; */
+}
+
+.search-filter input[type="text"]{
+	width: 300px;
+}
+
+.search-filter input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+	width: 200px;
+}
+
+
+.search-filter button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }

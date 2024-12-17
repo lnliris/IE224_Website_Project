@@ -1,0 +1,120 @@
+/* Base styles for the product detail page */
+.product-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 40px;
+    background-color: #f8f8f8;
+}
+
+.product-images {
+    flex: 1;
+    margin-right: 30px;
+}
+
+.product-main-image {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.product-main-image:hover {
+    transform: scale(1.05);
+}
+
+.product-thumbnail-images {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.thumbnail-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.thumbnail-image:hover {
+    transform: scale(1.05);
+}
+
+.product-info {
+    flex: 1.5;
+    max-width: 600px;
+}
+
+.product-info h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #ff6347;
+    margin-bottom: 20px;
+}
+
+.product-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.product-meta p {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.product-actions {
+    display: flex;
+    gap: 20px;
+}
+
+.btn-add-to-cart,
+.btn-buy-now {
+    padding: 15px 30px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-add-to-cart:hover,
+.btn-buy-now:hover {
+    background-color: #218838;
+}
+
+.btn-buy-now {
+    background-color: #ff6347;
+}
+
+.btn-buy-now:hover {
+    background-color: #e53d32;
+}
+
+@media (max-width: 768px) {
+    .product-detail {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .product-info {
+        margin-top: 20px;
+    }
+
+    .product-images {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+}

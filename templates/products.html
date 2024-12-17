@@ -4,43 +4,65 @@
     <title>Danh sách sản phẩm</title>
 {% endblock page_title %}
 {% block addin %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 {% endblock addin%}
 
 <h3>Đây là trang sản phẩm</h3>
-{% load static %}
-<img src="{% static 'images/cart.png' %}">
+
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-4">
-            <div class="box-element product">
-                <h6><strong>Product</strong></h6>
-                <hr>
-                <button  class="btn btn-outline-secondary add-btn">Thêm giỏ hàng</button>
-                <a class="btn btn-outline-success" href="#">Xem</a>
-                <h4 style="display: inline; float: right"><strong>200.000 đ</strong></h4>
-            </div>
-        </div>
 
-        <div class="col-lg-4">
-            <div class="box-element product">
-                <h6><strong>Product</strong></h6>
-                <hr>
-                <button  class="btn btn-outline-secondary add-btn">Thêm giỏ hàng</button>
-                <a class="btn btn-outline-success" href="#">Xem</a>
-                <h4 style="display: inline; float: right"><strong>200.000 đ</strong></h4>
-            </div>
-        </div>
+<div class="search-filter">
+    <form method="get">
+        <input type="text" name="query" placeholder="Tìm kiếm sản phẩm..." value="{{ form.query.value }}">
+        <input type="number" name="min_price" placeholder="Giá thấp nhất" step="100000" value="{{ form.min_price.value }}">
+        <input type="number" name="max_price" placeholder="Giá cao nhất" step="100000" value="{{ form.max_price.value }}">
+        <button type="submit">Lọc</button>
+    </form>
+</div>
 
-        <div class="col-lg-4">
-            <div class="box-element product">
-                <h6><strong>Product</strong></h6>
-                <hr>
-                <button  class="btn btn-outline-secondary add-btn">Thêm giỏ hàng</button>
-                <a class="btn btn-outline-success" href="#">Xem</a>
-                <h4 style="display: inline; float: right"><strong>200.000 đ</strong></h4>
+
+<div class="grid_container">
+
+    
+    <div class="categories">
+        <h2>Danh mục</h2>
+        <div class="dropdown">
+            <button class="dropdown-btn"><a href="{% url 'products' %}">Tất cả sản phẩm</a></button>
+            <div class="dropdown-content">
+                {% for cat in categories %}
+                <a href="{% url 'product_list_by_category' cat.slug %}">{{ cat.name }}</a></a>
+                {% endfor %}
             </div>
         </div>
     </div>
+
+
+    <div>
+        <h2>Sản phẩm{% if category %} trong danh mục: {{ category.name }}{% endif %}</h2>
+        {% if products %}
+        <div class="item_grid_container">
+            {% for product in products %}
+                <div>
+                        <div class="box-element product">
+                            <a href="{% url 'product_detail' product.slug %}">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" >
+                                <h3>{{ product.name }}</h3>
+                            </a>
+                            <h4><strong>Giá: {{ product.formatted_price }}</strong></h4>
+                            <p>{% if product.is_in_stock %}Còn hàng{% else %}Hết hàng{% endif %}</p>
+                            <!-- <hr> -->
+                            <button  class="btn btn-outline-secondary add-btn">Thêm giỏ hàng</button>
+                            <a class="btn btn-outline-success" href="#">Xem</a>
+                        </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p style="color: red; font-weight: bold;">Không tìm thấy sản phẩm nào.</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock content %}
