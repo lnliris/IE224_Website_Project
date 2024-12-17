@@ -7,6 +7,7 @@
 {% block content %}
     <div class="container-fluid mt-4">
         <div class="row">
+            <!-- User Information -->
             <div class="col-md-4 border-right">
                 <h2>Welcome, {{ user.first_name }}</h2>
                 <p>Here is your dashboard.</p>
@@ -21,35 +22,50 @@
             </div>
 
             <div class="col-md-8">
-                <h3>Tổng đơn hàng: {{ total_orders }}</h3>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3>Tổng đơn hàng: {{ total_orders }}</h3>
+                </div>
                 <hr>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3>Số sản phẩm đã đặt: {{ total_products_bought }}</h3>
+                </div>
+                <hr>
+
                 <div>
-                    <h3>Đơn hàng chờ xử lý</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3>Đơn hàng chờ xử lý</h3>
+                        <a href="{% url 'cart' %}" class="btn btn-link">Đặt thêm</a>
+                    </div>
                     {% for order in pending_orders %}
-                        <div>
-                            <div class="card mb-3 border">
-                                <div class="card-body">
-                                    <p><strong>Order ID:</strong> {{ order.id }}</p>
-                                    <p><strong>Status:</strong> {{ order.status }}</p>
-                                    <p><strong>Total:</strong> {{ order.get_total }}</p>
-                                </div>
+                        <div class="card mb-3 border">
+                            <div class="card-body">
+                                <p><strong>Order ID:</strong> {{ order.id }}</p>
+                                <p><strong>Status:</strong> {{ order.status }}</p>
+                                <p><strong>Total:</strong> {{ order.get_total }}</p>
                             </div>
                         </div>
+                    {% empty %}
+                        <p>Không có đơn hàng chờ xử lý.</p>
                     {% endfor %}
                 </div>
                 <hr>
+
                 <div>
-                    <h3>Đơn hàng đã nhận thành công</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3>Đơn hàng đã nhận thành công</h3>
+                        <a href="{% url 'order-history' %}" class="btn btn-link">Lịch sử đơn hàng</a>
+                    </div>
                     {% for order in completed_orders %}
-                        <div>
-                            <div class="card mb-3 border">
-                                <div class="card-body">
-                                    <p><strong>Order ID:</strong> {{ order.id }}</p>
-                                    <p><strong>Status:</strong> {{ order.status }}</p>
-                                    <p><strong>Total:</strong> {{ order.get_total }}</p>
-                                </div>
+                        <div class="card mb-3 border">
+                            <div class="card-body">
+                                <p><strong>Order ID:</strong> {{ order.id }}</p>
+                                <p><strong>Status:</strong> {{ order.status }}</p>
+                                <p><strong>Total:</strong> {{ order.get_total }}</p>
                             </div>
                         </div>
+                    {% empty %}
+                        <p>Không có đơn hàng đã nhận thành công.</p>
                     {% endfor %}
                 </div>
             </div>

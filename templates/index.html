@@ -4,9 +4,16 @@
     <title>Home</title>
 {% endblock page_title %}
 
+{% block addin %}
+    <link rel="stylesheet" href="/static/css/home.css">
+{% endblock addin %}
+
 {% block content %}
-    <div class="container">
-        <br>
-        Chào mừng bạn đến với shop bán giày ZZZ
+    <div class="content">
+        <div>
+            <h1>CREATE SPORTY LIFE TOGETHER</h1>
+            <p>Mua giày với giá cả ưu đãi</p>
+            <a href="{% url 'products' %}" class="btn-start">Mua ngay</a>
+        </div>
     </div>
 {% endblock content %}

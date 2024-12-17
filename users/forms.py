@@ -38,16 +38,12 @@ class RegisterForms(forms.Form):
             raise forms.ValidationError("Mật khẩu nhập lại không khớp")
         return cleaned_data
 class LoginForms(forms.Form):
-    username = forms.CharField(label="Username or Email", min_length=5,
+    username = forms.CharField(label="Username or Email",
                                error_messages={
-                                   "min_length":"Kiểm tra lại độ dài tên tài khoản!",
                                    "required":"Vui lòng nhập tài khoản!",
                                })
 
-    password = forms.CharField(min_length=6, max_length=20,
-                               error_messages={
-                                   "min_length": "Kiểm tra lại độ dài mật khẩu!",
-                                   "max_length": "Kiểm tra lại độ dài mật khẩu!",
+    password = forms.CharField(error_messages={
                                    "required": "Vui lòng nhập mật khẩu!"
                                })
 

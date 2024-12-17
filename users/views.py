@@ -62,9 +62,6 @@ def register_view(request):
     })
     
 def login_view(request):
-    if request.role in ['Admin', 'User']:
-        return redirect('profile')
-
     if request.method == 'POST':
         form = LoginForms(request.POST)
         if form.is_valid():
@@ -81,26 +78,29 @@ def login_view(request):
     else:
         form = LoginForms()
     
-        return render(request, 'login.html', {'form': form})
+    return render(request, 'login.html', {'form': form})
 
 
-@login_required
+@login_required(login_url='login')
 def profile_view(request):
     if request.role not in ['Admin', 'User']:
         return redirect('login')
     
     orders = request.user.get_orders()
+    total_products_bought = sum(order_item.quantity for order in orders 
+                                                        for order_item in order.items.all())
     completed_orders = orders.filter(status='completed')[:5]
     pending_orders = orders.filter(status='in_progress')
     total_orders = orders.count()
     
     return render(request, 'profile.html', {
         'total_orders': total_orders,
+        'total_products_bought': total_products_bought,
         'completed_orders': completed_orders,
         'pending_orders': pending_orders
     })
 
-@login_required
+@login_required(login_url='login')
 def profile_update(request):
     if request.role not in ['Admin', 'User']:
         return redirect('login')
