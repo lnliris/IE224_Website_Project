@@ -22,7 +22,6 @@ def product_list(request, category_slug=None):
         'category': category,
         'categories': categories,
         'products': products,
-        'form': form,  # Truyền form vào context
     }
 
     return render(request, 'products.html', context)
@@ -33,6 +32,7 @@ def product_detail(request, product_slug):
     return render(request, 'product_detail.html', context)
 
 class ProductsView(View):
+    
     def get(self, request):
         products = Product.objects.filter(stock__gt=0)  # Lấy sản phẩm còn hàng
         categories = Category.objects.all()  # Lấy tất cả danh mục
@@ -53,10 +53,13 @@ class ProductsView(View):
             if max_price is not None:
                 products = products.filter(price__lte=max_price)  # Lọc giá <= max_price
 
+        print("Tất cả sản phẩm:", Product.objects.all())  # Debug tất cả sản phẩm
+        print("Sản phẩm còn hàng:", products)  # Debug sản phẩm có stock > 0
 
         context = {
             'products': products,
             'categories': categories,
+        'form': form,  # Truyền form vào context
         }
         return render(request, 'products.html', context)
 
