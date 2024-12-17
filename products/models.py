@@ -17,6 +17,7 @@ class Category(models.Model):
 
 # Model Sản phẩm
 class Product(models.Model):
+    id = models.AutoField(primary_key=True)  # Trường id, tự động tăng
     name = models.CharField(max_length=200)  # Tên sản phẩm
     slug = models.SlugField(max_length=200, unique=True, blank=True)  # Tạo slug từ tên sản phẩm
     category = models.ForeignKey(
