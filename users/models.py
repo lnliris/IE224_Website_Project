@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
+
 class MyUserManager(BaseUserManager):
     def create_user(self, first_name, last_name, username, email, password=None):
         if not email:
@@ -32,16 +33,25 @@ class MyUserManager(BaseUserManager):
         user.is_active = True
         user.is_staff = True
         user.is_superadmin = True
+        user.role = 'Admin'  # Default role for superusers
         user.save(using=self._db)
         return user
+
 class User(AbstractBaseUser):
+    ROLE_CHOICES = (
+        ('Admin', 'Admin'),
+        ('User', 'User'),
+        ('Guest', 'Guest'),
+    )
+
     first_name      = models.CharField(max_length=50)
     last_name       = models.CharField(max_length=50)
     username        = models.CharField(max_length=50, unique=True)
     email           = models.EmailField(max_length=100, unique=True)
+    role            = models.CharField(max_length=10, choices=ROLE_CHOICES, default='Guest')
 
     date_joined     = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(default=timezone.now)
+    last_login      = models.DateTimeField(default=timezone.now)
     is_admin        = models.BooleanField(default=False)
     is_staff        = models.BooleanField(default=False)
     is_active       = models.BooleanField(default=True)
@@ -54,12 +64,21 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.email
-    
+
     def has_perm(self, perm, obj=None):
-        return True
+        if self.role == 'Admin':
+            return True
+        if self.role == 'User' and perm.startswith('user.'):
+            return True
+        return False
 
     def has_module_perms(self, app_label):
-        return True
+        if self.role in ['Admin', 'User']:
+            return True
+        return False
+    
+    def get_orders(self):
+        return self.order_set.all() 
 
 class UserProfile(models.Model):
     user = models.OneToOneField('users.User', on_delete=models.CASCADE)

@@ -13,21 +13,44 @@
 
                 <div class="list-group">
                     <p><strong>Email:</strong> {{ user.email }}</p>
-                    <p><strong>Phone Number:</strong> {{ user.phone_number }}</p>
+                    <p><strong>First name:</strong> {{ user.first_name }}</p>
+                    <p><strong>Last name:</strong> {{ user.last_name }}</p>
                     <a href="{% url 'profile_update' %}" class="list-group-item list-group-item-action">Update Profile</a>
                     <a href="{% url 'logout' %}" class="list-group-item list-group-item-action">Logout</a>
                 </div>
             </div>
 
             <div class="col-md-8">
-                <h3>Lịch sử đặt hàng</h3>
-                <div class="card">
-                    <div class="card-body">
-                        <p><strong>Order ID:</strong> #12345</p>
-                        <p><strong>Date:</strong> 2024-12-15</p>
-                        <p><strong>Total:</strong> $250.00</p>
-                        <p><strong>Status:</strong> Shipped</p>
-                    </div>
+                <h3>Tổng đơn hàng: {{ total_orders }}</h3>
+                <hr>
+                <div>
+                    <h3>Đơn hàng chờ xử lý</h3>
+                    {% for order in pending_orders %}
+                        <div>
+                            <div class="card mb-3 border">
+                                <div class="card-body">
+                                    <p><strong>Order ID:</strong> {{ order.id }}</p>
+                                    <p><strong>Status:</strong> {{ order.status }}</p>
+                                    <p><strong>Total:</strong> {{ order.get_total }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <hr>
+                <div>
+                    <h3>Đơn hàng đã nhận thành công</h3>
+                    {% for order in completed_orders %}
+                        <div>
+                            <div class="card mb-3 border">
+                                <div class="card-body">
+                                    <p><strong>Order ID:</strong> {{ order.id }}</p>
+                                    <p><strong>Status:</strong> {{ order.status }}</p>
+                                    <p><strong>Total:</strong> {{ order.get_total }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>

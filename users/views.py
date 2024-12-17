@@ -62,32 +62,49 @@ def register_view(request):
     })
     
 def login_view(request):
+    if request.role in ['Admin', 'User']:
+        return redirect('profile')
+
     if request.method == 'POST':
         form = LoginForms(request.POST)
         if form.is_valid():
             username_or_email = form.cleaned_data['username']
             password = form.cleaned_data['password']
             
-            # Authenticate with username or email
             user = authenticate(username=username_or_email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('profile')  # Redirect to profile page after successful login
+                return redirect('profile')
             else:
                 error_message = "Invalid username or password."
                 return render(request, 'login.html', {'form': form, 'error_message': error_message})
     else:
         form = LoginForms()
     
-    return render(request, 'login.html', {'form': form})
+        return render(request, 'login.html', {'form': form})
 
 
 @login_required
 def profile_view(request):
-    return render(request, 'profile.html', {'user': request.user})
+    if request.role not in ['Admin', 'User']:
+        return redirect('login')
+    
+    orders = request.user.get_orders()
+    completed_orders = orders.filter(status='completed')[:5]
+    pending_orders = orders.filter(status='in_progress')
+    total_orders = orders.count()
+    
+    return render(request, 'profile.html', {
+        'total_orders': total_orders,
+        'completed_orders': completed_orders,
+        'pending_orders': pending_orders
+    })
 
 @login_required
 def profile_update(request):
+    if request.role not in ['Admin', 'User']:
+        return redirect('login')
+
     if request.method == 'POST':
         form = ProfileUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -98,8 +115,6 @@ def profile_update(request):
         form = ProfileUpdateForm(instance=request.user)
 
     return render(request, 'profile_update.html', {'form': form})
-
-
 
 def logout_view(request):
     logout(request)
