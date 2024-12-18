@@ -60,7 +60,8 @@
                             <h4><strong>Giá: {{ product.formatted_price }}</strong></h4>
                             <p>{% if product.is_in_stock %}Còn hàng{% else %}Hết hàng{% endif %}</p>
                             <!-- <hr> -->
-                            <button  class="btn btn-outline-secondary add-btn">Thêm giỏ hàng</button>
+                            <!-- <button  class="btn btn-outline-secondary add-btn">Thêm giỏ hàng</button> -->
+                            <a href="{% url 'add_cart' product.id %}" class="btn btn-outline-secondary add-btn">Thêm giỏ hàng</a>
                             <a class="btn btn-outline-success" href="#">Xem</a>
                         </div>
                 </div>

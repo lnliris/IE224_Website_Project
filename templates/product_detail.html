@@ -1,54 +1,63 @@
-{% extends 'base.html' %}
-
-{% block page_title %}
-    <title>Danh sách sản phẩm</title>
-{% endblock page_title %}
-
-
-{% block addin %}
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/product.css' %}">
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-{% endblock addin%}
-
-
-{% block content %}
+{% extends 'base.html' %} {% block page_title %}
+<title>Danh sách sản phẩm</title>
+{% endblock page_title %} {% block addin %} {% load static %}
+<link rel="stylesheet" href="{% static 'css/product.css' %}" />
+<script
+  src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+  integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+  crossorigin="anonymous"
+></script>
+{% endblock addin%} {% block content %}
 <div class="product-detail">
-    <div class="product-images">
-        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-main-image">
-        <!-- Ảnh phụ -->
-        <div class="product-thumbnail-images">
-            {% if product.image_1 %}
-                <img src="{{ product.image_1.url }}" alt="Product Thumbnail" class="thumbnail-image">
-            {% endif %}
-            {% if product.image_2 %}
-                <img src="{{ product.image_2.url }}" alt="Product Thumbnail" class="thumbnail-image">
-            {% endif %}
-            {% if product.image_3 %}
-                <img src="{{ product.image_3.url }}" alt="Product Thumbnail" class="thumbnail-image">
-            {% endif %}
-        </div>
+  <div class="product-images">
+    <img
+      src="{{ product.image.url }}"
+      alt="{{ product.name }}"
+      class="product-main-image"
+    />
+    <!-- Ảnh phụ -->
+    <div class="product-thumbnail-images">
+      {% if product.image_1 %}
+      <img
+        src="{{ product.image_1.url }}"
+        alt="Product Thumbnail"
+        class="thumbnail-image"
+      />
+      {% endif %} {% if product.image_2 %}
+      <img
+        src="{{ product.image_2.url }}"
+        alt="Product Thumbnail"
+        class="thumbnail-image"
+      />
+      {% endif %} {% if product.image_3 %}
+      <img
+        src="{{ product.image_3.url }}"
+        alt="Product Thumbnail"
+        class="thumbnail-image"
+      />
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="product-info">
+    <h1>{{ product.name }}</h1>
+    <p class="product-price">{{ product.formatted_price }}</p>
+    <p class="product-description">{{ product.description }}</p>
+    <div class="product-meta">
+      <p><strong>Danh mục:</strong> {{ product.category.name }}</p>
+      <p>
+        <strong>Trạng thái:</strong>
+        {% if product.stock > 0 %} Còn hàng {% else %} Hết hàng {% endif %}
+      </p>
     </div>
 
-    <div class="product-info">
-        <h1>{{ product.name }}</h1>
-        <p class="product-price">{{ product.formatted_price }}</p>
-        <p class="product-description">{{ product.description }}</p>
-        <div class="product-meta">
-            <p><strong>Danh mục:</strong> {{ product.category.name }}</p>
-            <p><strong>Trạng thái:</strong> 
-                {% if product.stock > 0 %}
-                    Còn hàng
-                {% else %}
-                    Hết hàng
-                {% endif %}
-            </p>
-        </div>
-
-        <div class="product-actions">
-            <button class="btn-add-to-cart">Thêm vào giỏ hàng</button>
-            <button class="btn-buy-now">Mua ngay</button>
-        </div>
+    <div class="product-actions">
+      <!-- <button class="btn-add-to-cart">Thêm vào giỏ hàng</button> -->
+      <a href="{% url 'add_cart' product.id %}" class="btn-add-to-cart"
+        >Thêm vào giỏ hàng</a
+      >
+      <button class="btn-buy-now">Mua ngay</button>
     </div>
+  </div>
 </div>
 {% endblock content %}
