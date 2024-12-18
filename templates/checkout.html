@@ -6,7 +6,13 @@
     <div class="col-lg-6">
         <div class="box-element" id="form-wrapper">
             <h3>Checkout</h3>
-            <form id="form" method="POST">
+
+            {% if error_message %}
+            <div class="alert alert-danger">
+                {{ error_message }}
+            </div>
+            {% endif %}
+            <form id="form" method="POST" action="{% url 'payment' %}">
                 {% csrf_token %}
                 <div id="user-info">
                     <div class="form-field">
@@ -79,5 +85,7 @@
             <h5>Total: ${{ total_price }}</h5>
         </div>
     </div>
+
+	
 </div>
 {% endblock content_checkout %}
