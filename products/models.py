@@ -71,4 +71,3 @@ class Variant(models.Model):
     def __str__(self):
         return f"{self.type}: {self.color} ({self.material}) - {self.product.name}"
     
-0

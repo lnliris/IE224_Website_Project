@@ -68,7 +68,7 @@ def add_cart(request, product_id):
                 cart_item.variations.add(*product_variation)
             cart_item.save()
         return redirect('cart')
-    # If the user is not authenticated
+    # Nếu người dùng chưa đăng nhập
     else:
         product_variation = []
         if request.method == 'POST':
@@ -90,6 +90,7 @@ def add_cart(request, product_id):
                 cart_id = _cart_id(request)
             )
         cart.save()
+        # Lấy hoặc tạo giỏ hàng theo session
 
         is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
         if is_cart_item_exists:

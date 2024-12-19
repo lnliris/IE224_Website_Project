@@ -11,13 +11,13 @@ class Cart(models.Model):
    
 
     def __str__(self):
-        return {self.cart_id}
+        return self.cart_id
 
 
 class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True) #Liên kết với user
     cart = models.ForeignKey(
-        Cart, on_delete=models.CASCADE, related_name="items"
+        Cart, on_delete=models.CASCADE, null=False, blank=False, related_name="items"
     )  # Liên kết với giỏ hàng
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE
@@ -27,7 +27,7 @@ class CartItem(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return {self.product.price} 
+        return self.product.price
     
     def total_price(self):
         """Tính tổng giá của item (price * quantity)."""
