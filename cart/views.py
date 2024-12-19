@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from products.models import Product, Variant
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 # Create your views here.
@@ -11,14 +10,15 @@ def _cart_id(request):
     cart = request.session.session_key
     if not cart:
         cart = request.session.create()
+    print(f"Session Key: {cart}")
     return cart
 
 
 def add_cart(request, product_id):
     """Thêm sản phẩm vào giỏ hàng"""
     current_user = request.user
-    product = Product.objects.get(id=product_id) #get the product
-    # If the user is authenticated
+    product = Product.objects.get(id=product_id) 
+    # Nếu user đã đăng nhập
     if current_user.is_authenticated:
         product_variation = []
         if request.method == 'POST':
@@ -44,7 +44,7 @@ def add_cart(request, product_id):
                 id.append(item.id)
 
             if product_variation in ex_var_list:
-                # increase the cart item quantity
+                # Tăng số lượng
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
@@ -52,7 +52,12 @@ def add_cart(request, product_id):
                 item.save()
 
             else:
-                item = CartItem.objects.create(product=product, quantity=1, user=current_user)
+                item = CartItem.objects.create(
+                    product=product, 
+                    quantity=1, 
+                    user=current_user,
+                    # cart=current_user.cart
+                )
                 if len(product_variation) > 0:
                     item.variations.clear()
                     item.variations.add(*product_variation)
@@ -68,6 +73,7 @@ def add_cart(request, product_id):
                 cart_item.variations.add(*product_variation)
             cart_item.save()
         return redirect('cart')
+    
     # Nếu người dùng chưa đăng nhập
     else:
         product_variation = []
@@ -84,7 +90,7 @@ def add_cart(request, product_id):
 
 
         try:
-            cart = Cart.objects.get(cart_id=_cart_id(request)) # get the cart using the cart_id present in the session
+            cart = Cart.objects.get(cart_id=_cart_id(request)) # lấy cart 
         except Cart.DoesNotExist:
             cart = Cart.objects.create(
                 cart_id = _cart_id(request)
@@ -95,9 +101,7 @@ def add_cart(request, product_id):
         is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
         if is_cart_item_exists:
             cart_item = CartItem.objects.filter(product=product, cart=cart)
-            # existing_variations -> database
-            # current variation -> product_variation
-            # item_id -> database
+           
             ex_var_list = []
             id = []
             for item in cart_item:
@@ -108,7 +112,7 @@ def add_cart(request, product_id):
             print(ex_var_list)
 
             if product_variation in ex_var_list:
-                # increase the cart item quantity
+                
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
