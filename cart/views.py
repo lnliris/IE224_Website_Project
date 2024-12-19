@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from products.models import Product, Variant
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 # Create your views here.
@@ -12,7 +13,6 @@ def _cart_id(request):
         cart = request.session.create()
     print(f"Session Key: {cart}")
     return cart
-
 
 def add_cart(request, product_id):
     """Thêm sản phẩm vào giỏ hàng"""
