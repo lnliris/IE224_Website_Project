@@ -3,30 +3,27 @@ from users.models import User
 from products.models import Product, Variant
 import uuid
 
-# Create your models here.
 class Cart(models.Model):
-    # id = models.AutoField(primary_key=True)  # Khóa chính mặc định là số nguyên
-    cart_id = models.CharField(max_length=250, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return self.cart_id
+    id = models.BigAutoField(primary_key=True)  # Auto-created primary key
+    cart_id = models.CharField(max_length=250, blank=True, unique=True)  # Unique identifier for cart
+    created_at = models.DateTimeField(auto_now_add=True)  # Timestamp when the cart was created
+    updated_at = models.DateTimeField(auto_now=True)  # Timestamp when the cart was last updated
 
+    def __str__(self):
+        return str(self.cart_id)
 
 class CartItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True) #Liên kết với user
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True, related_name='cart_items') # Liên kết với giỏ hàng
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE
-    )  # Liên kết với sản phẩm
-    quantity = models.PositiveIntegerField(default=1) 
-    variations = models.ManyToManyField(Variant, blank=True)
-    is_active = models.BooleanField(default=True)
+    id = models.BigAutoField(primary_key=True)  # Auto-created primary key
+    cart = models.ForeignKey(Cart, null=True, on_delete=models.CASCADE)  # Link to Cart
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)  # Link to Product
+    quantity = models.PositiveIntegerField(default=1)  # Quantity of the product
+    variations = models.ManyToManyField(Variant, blank=True)  # Link to product variations
+    is_active = models.BooleanField(default=True)  # Status of the cart item
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)  # Use custom user model
 
     def __str__(self):
-        return self.product.price
-    
+        return str(self.product)
+
     def total_price(self):
-        """Tính tổng giá của item (price * quantity)."""
+        """Calculate the total price of the item (price * quantity)."""
         return self.product.price * self.quantity
