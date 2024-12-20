@@ -6,9 +6,8 @@ from django.core.exceptions import ObjectDoesNotExist
 import uuid
 from django.contrib.auth.decorators import login_required
 
-@login_required
+@login_required(login_url='login')
 def checkout(request):
-    """Handle the checkout process and redirect to a confirmation page."""
     try:
         # Retrieve cart items for the logged-in user
         cart_items = CartItem.objects.filter(user=request.user, is_active=True)
@@ -16,19 +15,20 @@ def checkout(request):
             return redirect('cart')  # Redirect if no items in the cart
 
         if request.method == "POST":
+            print("nhận thông tin")
             # Create the order
             order = Order.objects.create(
                 user=request.user,
                 status="completed",
             )
-
+            print("nhận thông tin")
             # Add order history
             OrderHistory.objects.create(
                 user=request.user,
                 order=order,
                 status="completed",
             )
-
+            print("nhận thông tin")
             # Redirect to confirmation page without order ID
             return redirect('order_confirmation')
 
@@ -99,14 +99,14 @@ def payment_view(request):
         return redirect('checkout')
 
 
-@login_required
+@login_required(login_url='login')
 def order_history(request):
     """Display the order history for the user."""
     history = OrderHistory.objects.filter(user=request.user).order_by('-updated_at')
     return render(request, 'order_history.html', {'history': history})
 
 
-@login_required
+@login_required(login_url='login')
 def order_detail(request, order_id):
     """Display detailed order information."""
     order = get_object_or_404(Order, id=order_id, user=request.user)

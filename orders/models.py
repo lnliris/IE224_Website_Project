@@ -34,7 +34,6 @@ class Order(models.Model):
         self.save()
         OrderHistory.objects.create(user=self.user, order=self, status='completed')
 
-
 class OrderHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
