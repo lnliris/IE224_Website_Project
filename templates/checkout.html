@@ -1,91 +1,110 @@
+
 {% extends 'base.html' %}
 {% load static %}
+{% block page_title %}
+    <title>Checkout</title>
+{% endblock page_title %}
+
 {% block content_checkout %}
-<div class="row">
-    <!-- Checkout Form -->
-    <div class="col-lg-6">
-        <div class="box-element" id="form-wrapper">
-            <h3>Checkout</h3>
+<div class="container">
+    <div class="row">
+        {% if cart_items %}
+        <!-- Checkout Form -->
+        <div class="col-lg-6">
+            <div class="box-element" id="form-wrapper">
+                <h3>"Checkout"</h3>
 
-            {% if error_message %}
-            <div class="alert alert-danger">
-                {{ error_message }}
-            </div>
-            {% endif %}
-            <form id="form" method="POST" action="{% url 'payment' %}">
-                {% csrf_token %}
-                <div id="user-info">
-                    <div class="form-field">
-                        <label for="name">Full Name</label>
-                        <input required class="form-control" type="text" name="name" placeholder="Enter your name">
-                    </div>
-                    <div class="form-field">
-                        <label for="email">Email</label>
-                        <input required class="form-control" type="email" name="email" placeholder="Enter your email">
-                    </div>
+                {% if error_message %}
+                <div class="alert alert-danger">
+                    {{ error_message }}
                 </div>
+                {% endif %}
 
-                <div id="shipping-info">
+                <form id="form" method="POST" action="{% url 'payment' %}">
+                    {% csrf_token %}
+                    
+                    <!-- User Information -->
+                    <div id="user-info">
+                        <h4>"Thông tin người nhận"</h4>
+                        <div class="form-field">
+                            <label for="name">"Họ và tên"</label>
+                            <input required class="form-control" type="text" name="name" placeholder="Enter your name">
+                        </div>
+                        <div class="form-field">
+                            <label for="email">"Email"</label>
+                            <input required class="form-control" type="email" name="email" placeholder="Enter your email">
+                        </div>
+                    </div>
+
+                    <!-- Shipping Information -->
+                    <div id="shipping-info">
+                        <hr>
+                        <h4>"Thông tin giao hàng"</h4>
+                        <div class="form-field">
+                            <label for="address">"Địa chỉ"</label>
+                            <input required class="form-control" type="text" name="address" placeholder="Nhập số nhà, tên đường...">
+                        </div>
+                        <div class="form-field">
+                            <label for="city">"Phường/Xã/Thị trấn"</label>
+                            <input required class="form-control" type="text" name="city" placeholder="Nhập phường/xã/thị trấn...">
+                        </div>
+                        <div class="form-field">
+                            <label for="state">"Quận/Huyện/Thành phố"</label>
+                            <input required class="form-control" type="text" name="state" placeholder="Nhập quận/huyện/thành phố">
+                        </div>
+                        <div class="form-field">
+                            <label for="country">"Tỉnh/Thành phố"</label>
+                            <input required class="form-control" type="text" name="country" placeholder="Nhập tỉnh/thành phố'">
+                        </div>
+                        <div class="form-field">
+                            <label for="mobile">"Số điện thoại"</label>
+                            <input required class="form-control" type="tel" name="mobile" placeholder="Nhập số điện thoại" pattern="[0-9]{10,15}">
+                        </div>
+                    </div>
+
                     <hr>
-                    <h4>Shipping Information</h4>
-                    <div class="form-field">
-                        <label for="address">Address</label>
-                        <input required class="form-control" type="text" name="address" placeholder="Enter your address">
-                    </div>
-                    <div class="form-field">
-                        <label for="city">City</label>
-                        <input required class="form-control" type="text" name="city" placeholder="Enter your city">
-                    </div>
-                    <div class="form-field">
-                        <label for="state">State</label>
-                        <input required class="form-control" type="text" name="state" placeholder="Enter your state">
-                    </div>
-                    <div class="form-field">
-                        <label for="country">Country</label>
-                        <input required class="form-control" type="text" name="country" placeholder="Enter your country">
-                    </div>
-                    <div class="form-field">
-                        <label for="mobile">Phone Number</label>
-                        <input required class="form-control" type="text" name="mobile" placeholder="Enter your phone number">
-                    </div>
-                </div>
-
-                <hr>
-                <input id="form-button" class="btn btn-success btn-block" type="submit" value="Continue to Payment">
-            </form>
-        </div>
-    </div>
-
-    <!-- Order Summary -->
-    <div class="col-lg-6">
-        <div class="box-element">
-            <a class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Back to Cart</a>
-            <hr>
-            <h3>Order Summary</h3>
-            <div class="cart-items">
-                {% for item in cart_items %}
-                <div class="cart-row">
-                    <div style="flex:2">
-                        <img class="row-image" src="{{ item.product.image.url|default:'placeholder.png' }}" alt="Product Image">
-                    </div>
-                    <div style="flex:3">
-                        <p>{{ item.product.name }}</p>
-                    </div>
-                    <div style="flex:1">
-                        <p>${{ item.product.price }}</p>
-                    </div>
-                    <div style="flex:1">
-                        <p>x{{ item.quantity }}</p>
-                    </div>
-                </div>
-                {% endfor %}
+                    <input id="form-button" class="btn btn-success btn-block" type="submit" value="Thanh toán'" {% if not cart_items %}disabled{% endif %}>
+                </form>
             </div>
-            <hr>
-            <h5>Items: {{ total_items }}</h5>
-            <h5>Total: ${{ total_price }}</h5>
         </div>
-    </div>
 
-	
+        <!-- Order Summary -->
+        <div class="col-lg-6">
+            <div class="box-element">
+                <a class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; "Quay lại Giỏ hàng"</a>
+                <hr>
+                <h3>"Thông tin đơn hàng"</h3>
+                <div class="cart-items">
+                    {% for item in cart_items %}
+                    <div class="cart-row">
+                        <div style="flex:2">
+                            <img class="row-image" src="{{ item.product.image.url|default:'/static/images/placeholder.png' }}" alt="Product Image">
+                        </div>
+                        <div style="flex:3">
+                            <p>{{ item.product.name }}</p>
+                        </div>
+                        <div style="flex:1">
+                            <p>${{ item.product.price|floatformat:2 }}</p>
+                        </div>
+                        <div style="flex:1">
+                            <p>x{{ item.quantity }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <hr>
+                <h5>"Tổng số sản phẩm": {{ cart_items|length }}</h5>
+                <h5>"Tổng giá": {{ total|floatformat:2 }} VNĐ</h5>
+            </div>
+        </div>
+        {% else %}
+        <!-- Empty Cart -->
+        <div class="col-md-12 text-center">
+            <p class="text-muted">Giỏ hàng trống. Hãy thêm sản phẩm để Checkout!</p>
+            <a href="{% url 'products' %}" class="btn btn-primary">Tiếp tục mua sắm</a>
+        </div>
+        {% endif %}
+    </div>
 </div>
-{% endblock content_checkout %}
+{% endblock %}
+

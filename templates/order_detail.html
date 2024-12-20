@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+    <title>Chi tiết đơn hàng</title>
+{% endblock page_title %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-5 text-center">Chi Tiết Đơn Hàng</h2>
+    <p><strong>Mã đơn hàng:</strong> {{ order.id }}</p>
+    <p><strong>Ngày đặt:</strong> {{ order.ordered_date|date:"d/m/Y H:i" }}</p>
+    <p><strong>Trạng thái:</strong> {{ order.get_status_display }}</p>
+
+    <h4>Danh sách sản phẩm</h4>
+    <ul>
+        {% for item in order.cart.items.all %}
+        <li>{{ item.product.name }} - {{ item.quantity }} x ${{ item.product.price }}</li>
+        {% endfor %}
+    </ul>
+    <p><strong>Tổng cộng:</strong> ${{ order.get_total }}</p>
+</div>
+{% endblock %}
