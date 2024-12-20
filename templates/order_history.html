@@ -5,17 +5,39 @@
 {% endblock page_title %}
 
 {% block content %}
-  <h2>Order History</h2>
-  <ul>
-    {% for entry in history %}
-      <li>
-        <strong>Order ID:</strong> {{ entry.order.id }}<br>
-        <strong>Status:</strong> {{ entry.get_status_display }}<br>
-        <strong>Updated At:</strong> {{ entry.updated_at }}
-      </li>
-      <hr>
-    {% empty %}
-      <p>No order history available.</p>
-    {% endfor %}
-  </ul>
+<div class="container">
+    <h2 class="my-5 text-center">Lịch Sử Đặt Hàng</h2>
+
+    {% if history %}
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày cập nhật</th>
+                    <th>Chi tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in history %}
+                <tr>
+                    <td>{{ entry.order.id }}</td>
+                    <td>{{ entry.get_status_display }}</td>
+                    <td>{{ entry.updated_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'order_detail' entry.order.id %}" class="btn btn-info btn-sm">Xem chi tiết</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center">
+        <p class="text-muted">Hiện chưa có lịch sử đặt hàng.</p>
+        <a href="{% url 'products' %}" class="btn btn-primary">Mua hàng ngay</a>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
