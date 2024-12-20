@@ -4,7 +4,6 @@ from products.models import Product, Variant
 
 # Create your models here.
 class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Liên kết giỏ hàng với người dùng
     cart_id = models.CharField(max_length=250, blank=True)   
     created_at = models.DateTimeField(auto_now_add=True)  # Thời điểm tạo giỏ hàng
     updated_at = models.DateTimeField(auto_now=True)  # Thời điểm cập nhật giỏ hàng gần nhất

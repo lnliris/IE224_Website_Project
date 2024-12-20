@@ -18,7 +18,7 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    cart = models.OneToOneField('cart.Cart', on_delete=models.CASCADE)  # Link to the cart
+    cart = models.OneToOneField('cart.Cart', on_delete=models.CASCADE)  
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
     ordered_date = models.DateTimeField(default=timezone.now)

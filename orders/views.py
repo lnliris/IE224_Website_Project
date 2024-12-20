@@ -4,17 +4,14 @@ from .models import Order, OrderHistory
 from django.core.exceptions import ObjectDoesNotExist
 import uuid
 from django.contrib.auth.decorators import login_required
-
+from cart.views import _cart_id
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-@login_required
+@login_required(login_url='login')
+
 def checkout(request):
-    if request.method == "POST":
-        print("Received POST request!")  # Thông báo khi nhận POST
-        print("POST Data:", request.POST)  # Kiểm tra dữ liệu nhận được
-    else:
-        print("This is a GET request.")  # Thông báo nếu là GET
+    cart = Cart.objects.get(cart_id=_cart_id(request))
     try:
         # Lấy thông tin giỏ hàng của người dùng
         cart_items = CartItem.objects.filter(user=request.user, is_active=True)
@@ -32,13 +29,10 @@ def checkout(request):
             mobile = request.POST.get("mobile")
             payment_method = request.POST.get("payment_method")
             print(request.user)  # Thông báo khi nhận POST
+            print(_cart_id(request))  # Thông báo khi nhận POST
+            print(cart)  # Thông báo khi nhận POST
             # Tạo đơn hàng
-            cart = Cart.objects.filter(user=request.user).first()
-            if not cart:
-                cart = Cart.objects.create(user=request.user)
-                print("Giỏ hàng mới đã được tạo")
-            print("Giỏ hàng mới đã được tạo")
-
+            print("check")
             order = Order.objects.create(
                 user=request.user,
                 cart=cart,
@@ -77,7 +71,7 @@ def checkout(request):
         return redirect('cart')  # Quay lại giỏ hàng trong trường hợp lỗi
 
 
-# @login_required
+# @login_required(login_url='login')
 def order_confirmation(request):
     """Render a generic confirmation page."""
     return render(request, 'order_confirmation.html')
@@ -130,14 +124,14 @@ def payment_view(request):
         return redirect('checkout')
 
 
-@login_required
+@login_required(login_url='login')
 def order_history(request):
     """Display the order history for the user."""
     history = OrderHistory.objects.filter(user=request.user).order_by('-updated_at')
     return render(request, 'order_history.html', {'history': history})
 
 
-@login_required
+@login_required(login_url='login')
 def order_detail(request, order_id):
     """Display detailed order information."""
     order = get_object_or_404(Order, id=order_id, user=request.user)

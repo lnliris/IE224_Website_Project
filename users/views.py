@@ -44,7 +44,10 @@ def register_view(request):
                 )
                 user.save()
                 success_message = "Registration successful! You can now log in."
-                login(request, user)
+                login(request, user)             
+                cart_id = request.session.get('cart_id')
+                if cart_id:
+                    request.session['cart_id'] = cart_id
                 return redirect('profile')
 
             except Exception as e:
@@ -54,6 +57,7 @@ def register_view(request):
 
     else:
         form = RegisterForms()
+
 
     return render(request, 'register.html', {
         'form': form,
@@ -71,6 +75,9 @@ def login_view(request):
             user = authenticate(username=username_or_email, password=password)
             if user is not None:
                 login(request, user)
+                cart_id = request.session.get('cart_id')
+                if cart_id:
+                    request.session['cart_id'] = cart_id
                 return redirect('profile')
             else:
                 error_message = "Invalid username or password."

@@ -4,15 +4,30 @@ from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-
+import uuid
 # Create your views here.
 
-def _cart_id(request):
-    cart = request.session.session_key
-    if not cart:
-        cart = request.session.create()
-    print(f"Session Key: {cart}")
+def get_cart(request):
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+    except Cart.DoesNotExist:
+        cart = Cart.objects.create(cart_id=_cart_id(request))
     return cart
+
+def _cart_id(request):
+    cart_id = request.POST.get('cart_id') or request.session.get('cart_id')
+
+    if cart_id:
+        try:
+            uuid.UUID(cart_id)  # Validate that cart_id is a valid UUID
+        except (ValueError, TypeError):
+            cart_id = str(uuid.uuid4())  # Invalid UUID, create a new one
+            request.session['cart_id'] = cart_id
+    else:
+        cart_id = str(uuid.uuid4())  # Generate a new UUID if none exists
+        request.session['cart_id'] = cart_id
+
+    return cart_id
 
 def add_cart(request, product_id):
     """Thêm sản phẩm vào giỏ hàng"""
@@ -101,7 +116,7 @@ def add_cart(request, product_id):
         is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
         if is_cart_item_exists:
             cart_item = CartItem.objects.filter(product=product, cart=cart)
-           
+
             ex_var_list = []
             id = []
             for item in cart_item:
