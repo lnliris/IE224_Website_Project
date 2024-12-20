@@ -54,7 +54,7 @@
                                     <!-- <button  class="btn btn-outline-secondary add-btn">Thêm giỏ hàng</button> -->
                                     <!-- Cập nhật nút "Thêm giỏ hàng" -->
                                     <a href="{% url 'add_cart' product.id %}" class="btn btn-outline-secondary add-btn">Thêm giỏ hàng</a>
-                                    <a class="btn btn-outline-success" href="#">Xem</a>
+                                    <a class="btn btn-outline-success" href="{% url 'product_detail' product.slug %}">Xem</a>
                                 </div>
                         </div>
                     {% endfor %}
