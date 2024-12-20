@@ -11,10 +11,11 @@ from django.contrib import messages
 @login_required(login_url='login')
 
 def checkout(request):
-    cart = Cart.objects.get(cart_id=_cart_id(request))
+    cart_id1= request.session.get('cart_id')
+    print(cart_id1)
     try:
         # Lấy thông tin giỏ hàng của người dùng
-        cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+        cart_items = CartItem.objects.filter(user=request.user)
         if not cart_items.exists():
             messages.error(request, "Không có sản phẩm nào trong giỏ hàng.")
             return redirect('cart')  # Quay lại giỏ hàng nếu không có sản phẩm
@@ -28,9 +29,19 @@ def checkout(request):
             country = request.POST.get("country")
             mobile = request.POST.get("mobile")
             payment_method = request.POST.get("payment_method")
+            cart_id=_cart_id(request)
             print(request.user)  # Thông báo khi nhận POST
-            print(_cart_id(request))  # Thông báo khi nhận POST
-            print(cart)  # Thông báo khi nhận POST
+            print(cart_id)  # Thông báo khi nhận POST
+            if Cart.objects.filter(cart_id=cart_id).exists():
+                print(cart_id) 
+                cart = Cart.objects.get(cart_id=cart_id)
+            else:
+                print(cart_id) 
+                print("check không")
+                new_cart_id = str(uuid.uuid4())  # Tạo UUID mới
+                request.session['cart_id'] = new_cart_id  # Lưu vào session
+                cart = Cart.objects.create(cart_id=new_cart_id)
+            # print(cart)  # Thông báo khi nhận POST
             # Tạo đơn hàng
             print("check")
             order = Order.objects.create(
@@ -41,7 +52,6 @@ def checkout(request):
 
             print("Nhận Thông tin 2")  # Thông báo khi nhận POST
             # Cập nhật trạng thái giỏ hàng (vô hiệu hóa)
-            cart.is_active = False
             cart.save()
 
             # Lưu lịch sử đơn hàng
@@ -50,6 +60,12 @@ def checkout(request):
                 order=order,
                 status="processing",
             )
+
+            new_cart_id = str(uuid.uuid4())  # Tạo UUID mới
+            request.session['cart_id'] = new_cart_id  # Lưu vào session
+            
+            # Tạo một giỏ hàng mới trong cơ sở dữ liệu
+            Cart.objects.create(cart_id=new_cart_id)
 
             # Chuyển hướng đến trang xác nhận
             return redirect('order_confirmation')
