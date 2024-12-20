@@ -13,7 +13,7 @@
 <section class="section-content padding-y bg">
     <div class="container">
     
-   
+
     {% if not cart_items %}
     <h2 class="text-center">Giỏ hàng của bạn đang trống</h2> <br>
     <div class="text-center">
@@ -26,10 +26,10 @@
     <table class="table table-borderless table-shopping-cart">
     <thead class="text-muted">
     <tr class="small text-uppercase">
-      <th scope="col">Sản phẩm</th>
-      <th scope="col" width="120" class="left">Số lượng</th>
-      <th scope="col" width="120">Giá</th>
-      <th scope="col" class="text-right" width="200"> </th>
+        <th scope="col">Sản phẩm</th>
+        <th scope="col" width="120" class="left">Số lượng</th>
+        <th scope="col" width="120">Giá</th>
+        <th scope="col" class="text-right" width="200"> </th>
     </tr>
     </thead>
     <tbody>
@@ -47,7 +47,7 @@
 						{% for item in cart_item.variations.all %}
 							{{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
 						{% endfor %}
-					  {% endif %} 
+					    {% endif %} 
                     </p>
 
                 </figcaption>
@@ -59,9 +59,9 @@
                             <div class="input-group input-spinner d-flex align-items-center justify-content-center">
                                 <!-- Nút giảm -->
                                 <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" 
-                                   class="btn btn-light" 
-                                   type="button" 
-                                   id="button-minus">
+                                    class="btn btn-light" 
+                                    type="button" 
+                                    id="button-minus">
                                     <i class="fa fa-minus"></i>
                                 </a>
                                 
