@@ -50,7 +50,6 @@ def checkout(request):
                 status="processing",
             )
 
-            print("Nhận Thông tin 2")  # Thông báo khi nhận POST
             # Cập nhật trạng thái giỏ hàng (vô hiệu hóa)
             cart.save()
 
@@ -66,7 +65,8 @@ def checkout(request):
             
             # Tạo một giỏ hàng mới trong cơ sở dữ liệu
             Cart.objects.create(cart_id=new_cart_id)
-
+            cart_items.delete()
+            print("Nhận Thông tin 2")  # Thông báo khi nhận POST
             # Chuyển hướng đến trang xác nhận
             return redirect('order_confirmation')
 
@@ -74,12 +74,14 @@ def checkout(request):
         total = sum(item.product.price * item.quantity for item in cart_items)
         total_quantity = sum(item.quantity for item in cart_items)
 
+
         # Render trang checkout
         context = {
             'cart_items': cart_items,
             'total': total,
             'total_quantity': total_quantity,
         }
+
         return render(request, 'checkout.html', context)
 
     except Exception as e:
