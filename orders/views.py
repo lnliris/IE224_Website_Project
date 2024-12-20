@@ -6,49 +6,56 @@ from django.core.exceptions import ObjectDoesNotExist
 import uuid
 from django.contrib.auth.decorators import login_required
 
-# def _cart_id(request):
-#     """Retrieve or create a session cart ID."""
-#     cart_id = request.session.get('cart_id')
-#     if not cart_id:
-#         cart_id = str(uuid.uuid4())
-#         request.session['cart_id'] = cart_id
-#     return cart_id
-
-
+@login_required
 def checkout(request):
-    """Handle the checkout process for logged-in and non-logged-in users."""
+    """Handle the checkout process and redirect to a confirmation page."""
     try:
-        # Use the existing cart ID to retrieve the cart
-        if request.user.is_authenticated:
-            cart = Cart.objects.filter(cartitem__user=request.user).distinct().first()
-        else:
-            cart_id = request.session.get('cart_id')
-            cart = get_object_or_404(Cart, id=cart_id)
+        # Retrieve cart items for the logged-in user
+        cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+        if not cart_items.exists():
+            return redirect('cart')  # Redirect if no items in the cart
 
-        if not cart:
-            raise Cart.DoesNotExist
-
-        # Create or retrieve an order linked to the cart
-        if request.user.is_authenticated:
-            order, created = Order.objects.get_or_create(
-                cart=cart,
-                defaults={'user': request.user, 'status': 'in_progress'}
+        if request.method == "POST":
+            # Create the order
+            order = Order.objects.create(
+                user=request.user,
+                status="completed",
             )
-        else:
-            order, created = Order.objects.get_or_create(cart=cart, defaults={'status': 'in_progress'})
 
+            # Add order history
+            OrderHistory.objects.create(
+                user=request.user,
+                order=order,
+                status="completed",
+            )
+
+            # Redirect to confirmation page without order ID
+            return redirect('order_confirmation')
+
+        # Render checkout page
+        total = sum(item.product.price * item.quantity for item in cart_items)
+        total_quantity = sum(item.quantity for item in cart_items)
+        
         context = {
-            'order': order,
-            'error_message': None,
+            'cart_items': cart_items,
+            'total': total,
+            'total_quantity': total_quantity,
         }
         return render(request, 'checkout.html', context)
 
-    except Cart.DoesNotExist:
-        context = {
-            'order': None,
-            'error_message': "No active cart found. Please add items to your cart and try again.",
-        }
-        return render(request, 'checkout.html', context)
+    except Exception as e:
+        return redirect('cart')  # Redirect to cart in case of errors
+
+# @login_required
+def order_confirmation(request):
+    """Render a generic confirmation page."""
+    return render(request, 'order_confirmation.html')
+    
+def redirect_to_checkout_or_login(request):
+    """Redirect users to the checkout if logged in, or to login if not."""
+    if request.user.is_authenticated:
+        return redirect('checkout')  # Replace 'checkout' with the actual URL name for your checkout view
+    return redirect('login')  # Replace 'login' with the actual URL name for your login view
 
 
 def payment_view(request):
@@ -90,13 +97,6 @@ def payment_view(request):
 
     except ObjectDoesNotExist:
         return redirect('checkout')
-
-
-def order_confirmation(request, order_id):
-    """Display confirmation page after successful payment."""
-    order = get_object_or_404(Order, id=order_id)
-    context = {'order': order}
-    return render(request, 'order_confirmation.html', context)
 
 
 @login_required

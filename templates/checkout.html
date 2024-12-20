@@ -1,4 +1,4 @@
-
+checkout.html:
 {% extends 'base.html' %}
 {% load static %}
 {% block page_title %}
@@ -12,7 +12,7 @@
         <!-- Checkout Form -->
         <div class="col-lg-6">
             <div class="box-element" id="form-wrapper">
-                <h3>"Checkout"</h3>
+                <h3>Checkout</h3>
 
                 {% if error_message %}
                 <div class="alert alert-danger">
@@ -20,18 +20,18 @@
                 </div>
                 {% endif %}
 
-                <form id="form" method="POST" action="{% url 'payment' %}">
+                <form id="form" method="POST" action="{% url 'checkout' %}">
                     {% csrf_token %}
                     
                     <!-- User Information -->
                     <div id="user-info">
-                        <h4>"Thông tin người nhận"</h4>
+                        <h4>Thông tin người nhận</h4>
                         <div class="form-field">
-                            <label for="name">"Họ và tên"</label>
+                            <label for="name">Họ và tên</label>
                             <input required class="form-control" type="text" name="name" placeholder="Enter your name">
                         </div>
                         <div class="form-field">
-                            <label for="email">"Email"</label>
+                            <label for="email">Email</label>
                             <input required class="form-control" type="email" name="email" placeholder="Enter your email">
                         </div>
                     </div>
@@ -39,31 +39,52 @@
                     <!-- Shipping Information -->
                     <div id="shipping-info">
                         <hr>
-                        <h4>"Thông tin giao hàng"</h4>
+                        <h4>Thông tin giao hàng</h4>
                         <div class="form-field">
-                            <label for="address">"Địa chỉ"</label>
+                            <label for="address">Địa chỉ</label>
                             <input required class="form-control" type="text" name="address" placeholder="Nhập số nhà, tên đường...">
                         </div>
                         <div class="form-field">
-                            <label for="city">"Phường/Xã/Thị trấn"</label>
+                            <label for="city">Phường/Xã/Thị trấn</label>
                             <input required class="form-control" type="text" name="city" placeholder="Nhập phường/xã/thị trấn...">
                         </div>
                         <div class="form-field">
-                            <label for="state">"Quận/Huyện/Thành phố"</label>
+                            <label for="state">Quận/Huyện/Thành phố</label>
                             <input required class="form-control" type="text" name="state" placeholder="Nhập quận/huyện/thành phố">
                         </div>
                         <div class="form-field">
-                            <label for="country">"Tỉnh/Thành phố"</label>
-                            <input required class="form-control" type="text" name="country" placeholder="Nhập tỉnh/thành phố'">
+                            <label for="country">Tỉnh/Thành phố</label>
+                            <input required class="form-control" type="text" name="country" placeholder="Nhập tỉnh/thành phố">
                         </div>
                         <div class="form-field">
-                            <label for="mobile">"Số điện thoại"</label>
+                            <label for="mobile">Số điện thoại</label>
                             <input required class="form-control" type="tel" name="mobile" placeholder="Nhập số điện thoại" pattern="[0-9]{10,15}">
                         </div>
                     </div>
 
+                    <!-- Payment Methods -->
+                    <div id="payment-methods">
+                        <hr>
+                        <h4>Phương thức thanh toán</h4>
+                        <div class="form-check">
+                            <input required class="form-check-input" type="radio" name="payment_method" id="cod" value="cod">
+                            <label class="form-check-label" for="cod">Thanh toán khi nhận hàng</label>
+                        </div>
+                        <div class="form-check">
+                            <input required class="form-check-input" type="radio" name="payment_method" id="qr" value="qr">
+                            <label class="form-check-label" for="qr">Mã QR ngân hàng</label>
+                        </div>
+                        <div id="qr-details" class="mt-3" style="display: none;">
+                            <h5>Thông tin tài khoản ngân hàng</h5>
+                            <p><strong>Tên ngân hàng:</strong> UIT Bank</p>
+                            <p><strong>STK:</strong> 22520000</p>
+                            <p><strong>Tên tài khoản:</strong> Nhóm 15</p>
+                            <img src="{% static 'images/qr.png' %}" alt="QR Code" class="img-fluid qr-image" style="max-width: 40%; height: auto; display: block; margin: 0 auto;">
+                        </div>
+                    </div>
+
                     <hr>
-                    <input id="form-button" class="btn btn-success btn-block" type="submit" value="Thanh toán'" {% if not cart_items %}disabled{% endif %}>
+                    <input id="form-button" class="btn btn-success btn-block" type="submit" value="Đặt hàng" {% if not cart_items %}disabled{% endif %}>
                 </form>
             </div>
         </div>
@@ -71,9 +92,9 @@
         <!-- Order Summary -->
         <div class="col-lg-6">
             <div class="box-element">
-                <a class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; "Quay lại Giỏ hàng"</a>
+                <a class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Quay lại Giỏ hàng</a>
                 <hr>
-                <h3>"Thông tin đơn hàng"</h3>
+                <h3>Thông tin đơn hàng</h3>
                 <div class="cart-items">
                     {% for item in cart_items %}
                     <div class="cart-row">
@@ -84,7 +105,7 @@
                             <p>{{ item.product.name }}</p>
                         </div>
                         <div style="flex:1">
-                            <p>${{ item.product.price|floatformat:2 }}</p>
+                            <p>${{ item.product.price|floatformat:0 }}</p>
                         </div>
                         <div style="flex:1">
                             <p>x{{ item.quantity }}</p>
@@ -93,8 +114,8 @@
                     {% endfor %}
                 </div>
                 <hr>
-                <h5>"Tổng số sản phẩm": {{ cart_items|length }}</h5>
-                <h5>"Tổng giá": {{ total|floatformat:2 }} VNĐ</h5>
+                <h5>Tổng số sản phẩm: {{ total_quantity }}</h5>
+                <h5>Tổng giá: {{ total|floatformat:0 }} VNĐ</h5>
             </div>
         </div>
         {% else %}
@@ -106,5 +127,13 @@
         {% endif %}
     </div>
 </div>
-{% endblock %}
 
+<script>
+    document.getElementById('qr').addEventListener('change', function () {
+        document.getElementById('qr-details').style.display = 'block';
+    });
+    document.getElementById('cod').addEventListener('change', function () {
+        document.getElementById('qr-details').style.display = 'none';
+    });
+</script>
+{% endblock %}
