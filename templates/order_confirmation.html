@@ -1,11 +1,15 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+    <title>Đặt hàng thành công</title>
+{% endblock page_title %}
 
 {% block content %}
 <div class="container text-center">
-    <h2 class="my-5">Thank You for Your Purchase!</h2>
-    <p>Your order has been successfully placed.</p>
-    <p>Order ID: {{ order.id }}</p>
-    <p>Total: ${{ order.cart.items.all|sum:"quantity|multiply:price" }}</p>
-    <a href="{% url 'products' %}" class="btn btn-primary">Continue Shopping</a>
+    <img src="{% static 'images/success.png' %}" alt="Order Confirmation" class="img-fluid my-4" style="max-width: 20%; height: auto;">
+    <h2 class="my-3">Đơn hàng đã đặt thành công!</h2>
+    <p class="mb-4">Cảm ơn quý khách đã tin tưởng, đơn hàng sẽ sớm được giao.</p>
+    <a href="{% url 'home' %}" class="btn btn-primary">Quay về trang chủ</a>
 </div>
 {% endblock %}
