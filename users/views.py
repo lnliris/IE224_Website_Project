@@ -58,7 +58,6 @@ def register_view(request):
     else:
         form = RegisterForms()
 
-
     return render(request, 'register.html', {
         'form': form,
         'success_message': success_message,
@@ -71,35 +70,39 @@ def login_view(request):
         if form.is_valid():
             username_or_email = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            
+
             user = authenticate(username=username_or_email, password=password)
             if user is not None:
                 login(request, user)
                 cart_id = request.session.get('cart_id')
                 if cart_id:
                     request.session['cart_id'] = cart_id
-                return redirect('profile')
+                # Redirect back to the cart if coming from checkout
+                next_url = request.session.pop('next', 'profile')
+                return redirect(next_url)
             else:
                 error_message = "Invalid username or password."
                 return render(request, 'login.html', {'form': form, 'error_message': error_message})
     else:
+        # Save the next URL if coming from another page
+        next_url = request.GET.get('next', 'profile')
+        request.session['next'] = next_url
         form = LoginForms()
-    
-    return render(request, 'login.html', {'form': form})
 
+    return render(request, 'login.html', {'form': form})
 
 @login_required(login_url='login')
 def profile_view(request):
     if request.role not in ['Admin', 'User']:
         return redirect('login')
-    
+
     orders = request.user.get_orders()
     total_products_bought = sum(order_item.quantity for order in orders 
                                                         for order_item in order.items.all())
     completed_orders = orders.filter(status='completed')[:5]
     pending_orders = orders.filter(status='in_progress')
     total_orders = orders.count()
-    
+
     return render(request, 'profile.html', {
         'total_orders': total_orders,
         'total_products_bought': total_products_bought,
