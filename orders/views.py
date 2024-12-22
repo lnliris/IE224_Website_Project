@@ -2,25 +2,27 @@ from django.shortcuts import render, redirect, get_object_or_404
 from cart.models import Cart, CartItem
 from .models import Order, OrderHistory
 from django.core.exceptions import ObjectDoesNotExist
-import uuid
 from django.contrib.auth.decorators import login_required
 from cart.views import _cart_id
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
 @login_required(login_url='login')
-
 def checkout(request):
-    cart_id1= request.session.get('cart_id')
-    print(cart_id1)
     try:
-        # Lấy thông tin giỏ hàng của người dùng
-        cart_items = CartItem.objects.filter(user=request.user)
+        # Get the current cart using the session cart_id
+        cart_id = _cart_id(request)
+        cart = Cart.objects.get(cart_id=cart_id)
+
+        # Retrieve user's cart items
+        cart_items = CartItem.objects.filter(cart=cart)
+
         if not cart_items.exists():
             messages.error(request, "Không có sản phẩm nào trong giỏ hàng.")
-            return redirect('cart')  # Quay lại giỏ hàng nếu không có sản phẩm
+            return redirect('cart')  # Redirect to cart if no items exist
+
         if request.method == "POST":
-            # Lấy dữ liệu từ form
+            # Gather data from the form
             name = request.POST.get("name")
             email = request.POST.get("email")
             address = request.POST.get("address")
@@ -29,53 +31,29 @@ def checkout(request):
             country = request.POST.get("country")
             mobile = request.POST.get("mobile")
             payment_method = request.POST.get("payment_method")
-            cart_id=_cart_id(request)
-            print(request.user)  # Thông báo khi nhận POST
-            print(cart_id)  # Thông báo khi nhận POST
-            if Cart.objects.filter(cart_id=cart_id).exists():
-                print(cart_id) 
-                cart = Cart.objects.get(cart_id=cart_id)
-            else:
-                print(cart_id) 
-                print("check không")
-                new_cart_id = str(uuid.uuid4())  # Tạo UUID mới
-                request.session['cart_id'] = new_cart_id  # Lưu vào session
-                cart = Cart.objects.create(cart_id=new_cart_id)
-            # print(cart)  # Thông báo khi nhận POST
-            # Tạo đơn hàng
-            print("check")
+
+            # Create a new order
             order = Order.objects.create(
                 user=request.user,
                 cart=cart,
                 status="processing",
             )
 
-            # Cập nhật trạng thái giỏ hàng (vô hiệu hóa)
-            cart.save()
-
-            # Lưu lịch sử đơn hàng
+            # Save order history
             OrderHistory.objects.create(
                 user=request.user,
                 order=order,
                 status="processing",
             )
 
-            new_cart_id = str(uuid.uuid4())  # Tạo UUID mới
-            request.session['cart_id'] = new_cart_id  # Lưu vào session
-            
-            # Tạo một giỏ hàng mới trong cơ sở dữ liệu
-            Cart.objects.create(cart_id=new_cart_id)
-            cart_items.delete()
-            print("Nhận Thông tin 2")  # Thông báo khi nhận POST
-            # Chuyển hướng đến trang xác nhận
+            # Redirect to the order confirmation page
+            messages.success(request, "Thanh toán thành công, đơn hàng của bạn đã được tạo!")
             return redirect('order_confirmation')
 
-        # Tính tổng giá trị đơn hàng
+        # Calculate total cost and quantity
         total = sum(item.product.price * item.quantity for item in cart_items)
         total_quantity = sum(item.quantity for item in cart_items)
 
-
-        # Render trang checkout
         context = {
             'cart_items': cart_items,
             'total': total,
@@ -84,10 +62,13 @@ def checkout(request):
 
         return render(request, 'checkout.html', context)
 
+    except Cart.DoesNotExist:
+        return redirect('checkout')  # Redirect to checkout if cart does not exist
     except Exception as e:
+        # Log the error for debugging
+        print(f"Checkout error: {str(e)}")
         messages.error(request, "Đã xảy ra lỗi trong quá trình thanh toán.")
-        return redirect('cart')  # Quay lại giỏ hàng trong trường hợp lỗi
-
+        return redirect('cart')  # Redirect to cart in case of error
 
 # @login_required(login_url='login')
 def order_confirmation(request):

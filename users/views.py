@@ -3,6 +3,8 @@ from .forms import RegisterForms, LoginForms, ProfileUpdateForm
 from django.contrib.auth import authenticate as default_authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from cart.views import _cart_id, merge_cart_items
+from cart.models import CartItem
 
 User = get_user_model()
 
@@ -44,11 +46,10 @@ def register_view(request):
                 )
                 user.save()
                 success_message = "Registration successful! You can now log in."
-                login(request, user)             
-                cart_id = request.session.get('cart_id')
-                if cart_id:
-                    request.session['cart_id'] = cart_id
-                return redirect('profile')
+                login(request, user)
+                merge_cart_items(request)
+                next_url = request.session.pop('next', 'profile')
+                return redirect(next_url)
 
             except Exception as e:
                 error_message = f"Error: {str(e)}"
@@ -74,10 +75,7 @@ def login_view(request):
             user = authenticate(username=username_or_email, password=password)
             if user is not None:
                 login(request, user)
-                cart_id = request.session.get('cart_id')
-                if cart_id:
-                    request.session['cart_id'] = cart_id
-                # Redirect back to the cart if coming from checkout
+                merge_cart_items(request)
                 next_url = request.session.pop('next', 'profile')
                 return redirect(next_url)
             else:
@@ -97,10 +95,10 @@ def profile_view(request):
         return redirect('login')
 
     orders = request.user.get_orders()
-    total_products_bought = sum(order_item.quantity for order in orders 
-                                                        for order_item in order.items.all())
+    total_products_bought = sum(cart_item.quantity for order in orders for cart_item in order.cart.items.all())
+
     completed_orders = orders.filter(status='completed')[:5]
-    pending_orders = orders.filter(status='in_progress')
+    pending_orders = orders.filter(status='processing')[:5]
     total_orders = orders.count()
 
     return render(request, 'profile.html', {
