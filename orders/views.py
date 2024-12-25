@@ -9,6 +9,15 @@ from django.contrib import messages
 
 @login_required(login_url='login')
 def checkout(request):
+    '''
+    Hàm hiển thị thông tin hóa đơn và lưu hóa đơn
+
+    Args:
+        - request: người dùng (request.user), form hóa đơn (request.POST.get(...))
+
+    Output:
+        - Render form theo template checkout.html, lưu hóa đơn của người dùng nếu form đã nhập
+    '''
     try:
         # Get the current cart using the session cart_id
         cart_id = _cart_id(request)
@@ -72,18 +81,23 @@ def checkout(request):
 
 # @login_required(login_url='login')
 def order_confirmation(request):
-    """Render a generic confirmation page."""
+    """
+    Hàm hiển thị form confirm hóa đơn.
+    """
     return render(request, 'order_confirmation.html')
     
 def redirect_to_checkout_or_login(request):
-    """Redirect users to the checkout if logged in, or to login if not."""
+    """
+    Hàm điều hướng người dùng đến page checkout hoặc login
+    """
     if request.user.is_authenticated:
-        return redirect('checkout')  # Replace 'checkout' with the actual URL name for your checkout view
-    return redirect('login')  # Replace 'login' with the actual URL name for your login view
-
+        return redirect('checkout')
+    return redirect('login')
 
 def payment_view(request):
-    """Handle payment view."""
+    """
+    Hàm trả về payment view (phiên bản cũ của hàm checkout, không còn sử dụng)
+    """
     try:
         if request.user.is_authenticated:
             cart = Cart.objects.filter(cartitem__user=request.user).distinct().first()
@@ -122,16 +136,19 @@ def payment_view(request):
     except ObjectDoesNotExist:
         return redirect('checkout')
 
-
 @login_required(login_url='login')
 def order_history(request):
-    """Display the order history for the user."""
+    """
+    Hàm lấy lịch sử 
+    """
     history = OrderHistory.objects.filter(user=request.user).order_by('-updated_at')
     return render(request, 'order_history.html', {'history': history})
 
 
 @login_required(login_url='login')
 def order_detail(request, order_id):
-    """Display detailed order information."""
+    """
+    Hàm hiển thị chi tiết hóa đơn
+    """
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'order_detail.html', {'order': order})

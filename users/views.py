@@ -9,6 +9,15 @@ from cart.models import CartItem
 User = get_user_model()
 
 def authenticate(username=None, password=None):
+    '''
+    Hàm xác thực cho người dùng
+
+    Args:
+        - username (str): username hoặc email của người dùng
+        - password (str): mật khẩu của người dùng
+    Output:
+        - Kiểm tra người dùng nhập đúng thông tin xác thực
+    '''
     if username and password:
         try:
             # Check for either username or email
@@ -24,6 +33,16 @@ def authenticate(username=None, password=None):
     return None
 
 def register_view(request):
+    '''
+    Hàm hiển thị nội dung đăng ký và tạo người dùng
+
+    Args:
+        - request (dict): Chứa thông tin từ form (username, email, first_name, last_name, password)- 
+
+    Output:
+        -  Render form khi chưa nhập thông tin theo template register.html và tạo người dùng khi đã nhập thông tin
+
+    '''
     success_message = ""
     error_message = ""
 
@@ -66,6 +85,16 @@ def register_view(request):
     })
     
 def login_view(request):
+    '''
+    Hàm hiển thị nội dung đăng nhập, đăng nhập và merge giỏ hàng
+
+    Args:
+        - request (dict): Chứa thông tin từ form (username, password)-, các thông tin cart (cart_id)
+
+    Output:
+        - Render form khi chưa nhập thông tin theo template login.html, đăng nhập và merge giỏ hàng nếu đã nhập.
+
+    '''
     if request.method == 'POST':
         form = LoginForms(request.POST)
         if form.is_valid():
@@ -91,6 +120,14 @@ def login_view(request):
 
 @login_required(login_url='login')
 def profile_view(request):
+    '''
+    Hàm hiển thị profile người dùng
+    
+    Args: 
+        - request (dict): Lấy user hiện tại để truy cập các đơn hàng (tôngr số đơn hàng, ...).
+    Output:
+        - render trang profile theo template profile.html
+    '''
     if request.role not in ['Admin', 'User']:
         return redirect('login')
 
@@ -110,6 +147,16 @@ def profile_view(request):
 
 @login_required(login_url='login')
 def profile_update(request):
+    '''
+    Hàm hiển thị nội dung thay đổi profile
+
+    Args:
+        - request (dict): Chứa thông tin từ form (first_name, last_name)
+
+    Output:
+        - Render form khi chưa nhập thông tin theo template profile_update.html, thay đổi thông tin người dùng.
+
+    '''
     if request.role not in ['Admin', 'User']:
         return redirect('login')
 
@@ -125,5 +172,14 @@ def profile_update(request):
     return render(request, 'profile_update.html', {'form': form})
 
 def logout_view(request):
+    '''
+    Hàm đăng xuất
+    
+    Args:
+        - request (dict): chứa user hiện tại
+
+    Output:
+        - Đăng xuất và điều hướng người dùng đến trang login.
+    '''
     logout(request)
     return redirect('login')

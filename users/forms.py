@@ -4,6 +4,9 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class RegisterForms(forms.Form):
+    '''
+    Kiểm tra các thông tin trong form đăng ký
+    '''
     username = forms.CharField(min_length=5, max_length=20, error_messages={
         "min_length": "Tên người dùng không được ít hơn 5 ký tự!",
         "max_length": "Tên người dùng đã vượt quá 15 ký tự!",
@@ -38,6 +41,9 @@ class RegisterForms(forms.Form):
             raise forms.ValidationError("Mật khẩu nhập lại không khớp")
         return cleaned_data
 class LoginForms(forms.Form):
+    '''
+    Kiểm tra các thông tin trong form đăng nhập
+    '''
     username = forms.CharField(label="Username or Email",
                                error_messages={
                                    "required":"Vui lòng nhập tài khoản!",
@@ -48,6 +54,9 @@ class LoginForms(forms.Form):
                                })
 
 class ProfileUpdateForm(forms.ModelForm):
+    '''
+    Các thông tin form update dữ liệu người dùng
+    '''
     class Meta:
         model = User
         fields = ['first_name', 'last_name']

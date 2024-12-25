@@ -5,6 +5,9 @@ from django.utils.text import slugify
 
 # Model Danh mục sản phẩm
 class Category(models.Model):
+    '''
+    Loại của sản phẩm
+    '''
     name = models.CharField(max_length=200, unique=True)  # Tên danh mục (ví dụ: Thời trang, Điện tử)
     description = models.TextField(null=True, blank=True)  # Mô tả danh mục
     slug = models.SlugField(max_length=200, unique=True, blank=True)  # Tạo slug từ tên danh mục
@@ -17,6 +20,9 @@ class Category(models.Model):
 
 # Model Sản phẩm
 class Product(models.Model):
+    '''
+    Các thông tin của sản phẩm
+    '''
     id = models.AutoField(primary_key=True)  # Trường id, tự động tăng
     name = models.CharField(max_length=200)  # Tên sản phẩm
     slug = models.SlugField(max_length=200, unique=True, blank=True)  # Tạo slug từ tên sản phẩm
@@ -34,22 +40,32 @@ class Product(models.Model):
     image_3 = models.ImageField(upload_to='products/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
+        '''
+        Hàm save kế thừa từ models.Model
+        '''
         if not self.slug:  # Tự động tạo slug nếu chưa có
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
+    
     @property
     def formatted_price(self):
         return f"{self.price:,.0f} VND"
+    
     @property
     def is_in_stock(self):
-        """Kiểm tra xem sản phẩm còn hàng hay không"""
+        """
+        Kiểm tra xem sản phẩm còn hàng hay không
+        """
         return self.stock > 0
 
 # Model Biến thể sản phẩm
 class Variant(models.Model):
+    '''
+    Các biến thế (loại sản phẩm, nguyên liệu,...)
+    '''
     PRODUCT_TYPE_CHOICES = (
         ('Official', 'Chính hãng'),
         ('Pro', 'Pro'),
