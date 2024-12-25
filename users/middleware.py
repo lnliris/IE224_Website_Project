@@ -3,7 +3,7 @@ from django.http import HttpResponse
 
 class RoleRequiredMiddleware:
     """
-    Middleware to assign roles: Admin, User, Guest based on authentication and permissions.
+    Middleware để phân quyền: Admin, User, Guest
     """
     def __init__(self, get_response):
         self.get_response = get_response

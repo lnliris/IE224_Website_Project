@@ -3,202 +3,206 @@ from products.models import Product, Variant
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import HttpResponse
+from orders.models import Order
 import uuid
 
-# Create your views here.
-
-def get_cart(request):
-    try:
-        cart = Cart.objects.get(cart_id=_cart_id(request))
-    except Cart.DoesNotExist:
-        cart = Cart.objects.create(cart_id=_cart_id(request))
-    return cart
-
 def _cart_id(request):
-    cart_id = request.POST.get('cart_id') or request.session.get('cart_id')
+    '''
+    Hàm tạo id cho cart
 
-    if cart_id:
-        try:
-            uuid.UUID(cart_id)  # Validate that cart_id is a valid UUID
-        except (ValueError, TypeError):
-            cart_id = str(uuid.uuid4())  # Invalid UUID, create a new one
-            request.session['cart_id'] = cart_id
+    Args:
+        - request (dict): request.user là người dùng sở hữu cart, request.session['cart_id] là cart tạm thời
+
+    Output:
+        - cart.cart_id: id của cart đã tạo ra nếu người dùng chưa đăng nhập, id của cart người dùng nếu đã đăng nhập
+    '''
+    if request.user.is_authenticated:
+        # Truy vấn cart của người dùng (nằm trong list cart của người dùng nhưng ko nằm trong order)
+        cart = Cart.objects.filter(user=request.user).exclude(id__in=Order.objects.values_list('cart_id', flat=True)).first()
+
+        # Nếu không tìm thấy thì tạo ra cart mới
+        if not cart: 
+            cart_id = str(uuid.uuid4())
+            cart = Cart.objects.create(cart_id=cart_id, user=request.user)
     else:
-        cart_id = str(uuid.uuid4())  # Generate a new UUID if none exists
-        request.session['cart_id'] = cart_id
-
-    return cart_id
-
-def merge_cart_items(user, session_cart):
-    """Merge session cart items into the user's cart after login."""
-    user_cart_items = CartItem.objects.filter(user=user)
-    for session_item in session_cart:
-        matching_items = user_cart_items.filter(product=session_item.product, variations__in=session_item.variations.all())
-        if matching_items.exists():
-            user_item = matching_items.first()
-            user_item.quantity += session_item.quantity
-            user_item.save()
+        # Với khách, lấy session.cart_id hoặc tạo ra cart mới
+        cart_id = request.session.get('cart_id')
+        if not cart_id:
+            cart_id = str(uuid.uuid4())
+            request.session['cart_id'] = cart_id
+            cart = Cart.objects.create(cart_id=cart_id)  # Ensure cart creation for guests
         else:
-            session_item.user = user
-            session_item.cart = None
+            cart = get_object_or_404(Cart, cart_id=cart_id)
+
+    return cart.cart_id
+
+def merge_cart_items(request):
+    """
+    Hàm merge cart tạm thời với cart của người dùng
+
+    Args:
+        - request (dict): request.user là người dùng hiện tại, request.session['cart_id] là cart tạm thời
+
+    """
+    # Lấy hoặc tạo ra cart_id cho người dùng
+    cart_id = _cart_id(request)
+
+    # Lấy session cart
+    session_cart_id = request.session.get('cart_id')
+    session_cart = Cart.objects.filter(cart_id=session_cart_id).first()
+
+    if session_cart:
+        # Lấy cart
+        user_cart, created = Cart.objects.get_or_create(cart_id=cart_id, user = request.user)
+
+        # Merge các phần tử của hai cart
+        for session_item in session_cart.cart_items.all():
+            # Directly associate session item with user cart
+            session_item.cart = user_cart
             session_item.save()
-    session_cart.delete()
+
+        # Xóa session cart
+        session_cart.delete()
+        request.session.pop('cart_id', None)
+
+    return None
 
 def add_cart(request, product_id):
-    """Thêm sản phẩm vào giỏ hàng"""
-    current_user = request.user
-    product = Product.objects.get(id=product_id) 
-    product_variation = []
+    '''
+    Hàm thêm sản phẩm vào cart
 
-    if request.method == 'POST':
-        for item in request.POST:
-            key = item
-            value = request.POST[key]
+    Args:
+        - request (dict): request.user là người dùng hiện tại
+        - product_id (str): mã sản phẩm
 
-            try:
-                variation = Variant.objects.get(product=product, variation_category__iexact=key, variation_value__iexact=value)
-                product_variation.append(variation)
-            except:
-                pass
+    Output:
+        - Cập nhật giỏ hàng và chuyển hướng đến url cart
+    '''
+    product = get_object_or_404(Product, id=product_id)
+    cart_id = _cart_id(request)
 
-    if current_user.is_authenticated:
-        # Merge session cart items into user's cart if applicable
-        session_cart = CartItem.objects.filter(cart__cart_id=_cart_id(request))
-        if session_cart.exists():
-            merge_cart_items(current_user, session_cart)
+    # Lấy hoặc tạo cart
+    if request.user.is_authenticated: # Trường hợp người dùng đã đăng nhập
+        cart, _ = Cart.objects.get_or_create(cart_id=cart_id, user=request.user)
+    else: # Trường hợp chưa đăng nhập
+        cart, _ = Cart.objects.get_or_create(cart_id=cart_id)
 
-        is_cart_item_exists = CartItem.objects.filter(product=product, user=current_user).exists()
-        if is_cart_item_exists:
-            cart_item = CartItem.objects.filter(product=product, user=current_user)
-            ex_var_list = []
-            id = []
-            for item in cart_item:
-                existing_variation = item.variations.all()
-                ex_var_list.append(list(existing_variation))
-                id.append(item.id)
+    # Tạo các cart_item chưa có trong giỏ hàng
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=cart,  # Ensure the cart is set here
+        product=product,
+        defaults={'quantity': 1}
+    )
+    # Cập nhật số lượng nếu đã có trong giỏ hàng
+    if not created: 
+        cart_item.quantity += 1
+        cart_item.save()
 
-            if product_variation in ex_var_list:
-                # Tăng số lượng
-                index = ex_var_list.index(product_variation)
-                item_id = id[index]
-                item = CartItem.objects.get(product=product, id=item_id)
-                item.quantity += 1
-                item.save()
-
-            else:
-                item = CartItem.objects.create(
-                    product=product, 
-                    quantity=1, 
-                    user=current_user,
-                )
-                if len(product_variation) > 0:
-                    item.variations.clear()
-                    item.variations.add(*product_variation)
-                item.save()
-        else:
-            cart_item = CartItem.objects.create(
-                product = product,
-                quantity = 1,
-                user = current_user,
-            )
-            if len(product_variation) > 0:
-                cart_item.variations.clear()
-                cart_item.variations.add(*product_variation)
-            cart_item.save()
-        return redirect('cart')
-
-    else:
-        try:
-            cart = Cart.objects.get(cart_id=_cart_id(request)) # lấy cart 
-        except Cart.DoesNotExist:
-            cart = Cart.objects.create(
-                cart_id = _cart_id(request)
-            )
-        cart.save()
-
-        is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
-        if is_cart_item_exists:
-            cart_item = CartItem.objects.filter(product=product, cart=cart)
-
-            ex_var_list = []
-            id = []
-            for item in cart_item:
-                existing_variation = item.variations.all()
-                ex_var_list.append(list(existing_variation))
-                id.append(item.id)
-
-            if product_variation in ex_var_list:
-                index = ex_var_list.index(product_variation)
-                item_id = id[index]
-                item = CartItem.objects.get(product=product, id=item_id)
-                item.quantity += 1
-                item.save()
-
-            else:
-                item = CartItem.objects.create(product=product, quantity=1, cart=cart)
-                if len(product_variation) > 0:
-                    item.variations.clear()
-                    item.variations.add(*product_variation)
-                item.save()
-        else:
-            cart_item = CartItem.objects.create(
-                product = product,
-                quantity = 1,
-                cart = cart,
-            )
-            if len(product_variation) > 0:
-                cart_item.variations.clear()
-                cart_item.variations.add(*product_variation)
-            cart_item.save()
-        return redirect('cart')
+    return redirect('cart')
 
 def remove_cart(request, product_id, cart_item_id):
-    """Giảm số sản phẩm trong giỏ hàng"""
+    '''
+    Hàm giảm số lượng sản phẩm đi một
+
+    Args:
+        - request (dict): request.user là người dùng hiện tại
+        - product_id: mã sản phẩm muốn thay đổi.
+        - cart_item_id: mã của sản phẩm trong giỏ hàng 
+
+    Output: 
+        - Giảm số lượng sản phẩm đã chọn đi một, nếu về 0 thì xóa khỏi giỏ hàng. Sau đó điều hướng đến url cart
+    '''
     product = get_object_or_404(Product, id=product_id)
-    try:
-        if request.user.is_authenticated:
-            cart_item = CartItem.objects.get(product=product, user=request.user, id=cart_item_id)
-        else:
-            cart = Cart.objects.get(cart_id=_cart_id(request))
-            cart_item = CartItem.objects.get(product=product, cart=cart, id=cart_item_id)
-        if cart_item.quantity > 1:
-            cart_item.quantity -= 1
-            cart_item.save()
-        else:
-            cart_item.delete()
-    except:
-        pass
+    cart_id = _cart_id(request)
+
+    # Lấy cart và cart_item
+    if request.user.is_authenticated:
+        cart_item = get_object_or_404(
+            CartItem, 
+            cart__user=request.user, 
+            cart__cart_id=cart_id, 
+            product=product, 
+            id=cart_item_id
+        )
+    else:
+        cart = get_object_or_404(Cart, cart_id=cart_id)
+        cart_item = get_object_or_404(CartItem, cart=cart, product=product, id=cart_item_id)
+
+    # Giảm số lượng hoặc xóa sản phẩm
+    if cart_item.quantity > 1:
+        cart_item.quantity -= 1
+        cart_item.save()
+    else:
+        cart_item.delete()
+
     return redirect('cart')
 
 def remove_cart_item(request, product_id, cart_item_id):
-    """Xóa hoàn toàn sản phẩm ra khỏi giỏ hàng"""
+    '''
+    Hàm xóa một sản phẩm khỏi giỏ hàng
+
+    Args:
+        - request (dict): request.user là người dùng hiện tại
+        - product_id: mã sản phẩm muốn thay đổi.
+        - cart_item_id: mã của sản phẩm trong giỏ hàng 
+
+    Output: 
+        - Xóa sản phẩm khỏi giỏ hàng rồi điều hướng đến url cart
+    '''
+
     product = get_object_or_404(Product, id=product_id)
+    cart_id = _cart_id(request)
+
+    # Get the cart and cart item
     if request.user.is_authenticated:
-        cart_item = CartItem.objects.get(product=product, user=request.user, id=cart_item_id)
+        cart_item = get_object_or_404(
+            CartItem, 
+            cart__user=request.user, 
+            cart__cart_id=cart_id, 
+            product=product, 
+            id=cart_item_id
+        )
     else:
-        cart = Cart.objects.get(cart_id=_cart_id(request))
-        cart_item = CartItem.objects.get(product=product, cart=cart, id=cart_item_id)
+        cart = get_object_or_404(Cart, cart_id=cart_id)
+        cart_item = get_object_or_404(CartItem, cart=cart, product=product, id=cart_item_id)
+
     cart_item.delete()
     return redirect('cart')
 
-def cart(request, total=0, quantity=0, cart_items=None):
-    try:
-        if request.user.is_authenticated:
-            # Merge session cart items into user's cart after login
-            session_cart = CartItem.objects.filter(cart__cart_id=_cart_id(request))
-            if session_cart.exists():
-                merge_cart_items(request.user, session_cart)
+def cart(request):
+    '''
+    Hàm hiển thị các sản phẩm trong cart
 
-            cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+    Args:
+        - request (dict): request.user là người dùng hiện tại.
+    
+    Output:
+        - render các sản phẩm trong giỏ hàng theo template cart.html 
+    '''
+    total = 0
+    quantity = 0
+    cart_items = []
+
+    try:
+        cart_id = _cart_id(request)
+        if request.user.is_authenticated:
+            cart_items = CartItem.objects.filter(
+                cart__user=request.user, 
+                cart__cart_id=cart_id, 
+                is_active=True
+            )
         else:
-            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart = get_object_or_404(Cart, cart_id=cart_id)
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+
+        # Tính tổng giá trị của giỏ hàng và số lượng các sản phẩm.
         for cart_item in cart_items:
-            total += (cart_item.product.price * cart_item.quantity)
+            total += cart_item.product.price * cart_item.quantity
             quantity += cart_item.quantity
     except ObjectDoesNotExist:
-        pass #just ignore
+        pass
 
     context = {
         'total': total,
@@ -206,3 +210,4 @@ def cart(request, total=0, quantity=0, cart_items=None):
         'cart_items': cart_items,
     }
     return render(request, 'cart.html', context)
+

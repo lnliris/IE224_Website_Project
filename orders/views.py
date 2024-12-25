@@ -2,25 +2,36 @@ from django.shortcuts import render, redirect, get_object_or_404
 from cart.models import Cart, CartItem
 from .models import Order, OrderHistory
 from django.core.exceptions import ObjectDoesNotExist
-import uuid
 from django.contrib.auth.decorators import login_required
 from cart.views import _cart_id
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
 @login_required(login_url='login')
-
 def checkout(request):
-    cart_id1= request.session.get('cart_id')
-    print(cart_id1)
+    '''
+    Hàm hiển thị thông tin hóa đơn và lưu hóa đơn
+
+    Args:
+        - request: người dùng (request.user), form hóa đơn (request.POST.get(...))
+
+    Output:
+        - Render form theo template checkout.html, lưu hóa đơn của người dùng nếu form đã nhập
+    '''
     try:
-        # Lấy thông tin giỏ hàng của người dùng
-        cart_items = CartItem.objects.filter(user=request.user)
+        # Get the current cart using the session cart_id
+        cart_id = _cart_id(request)
+        cart = Cart.objects.get(cart_id=cart_id)
+
+        # Retrieve user's cart items
+        cart_items = CartItem.objects.filter(cart=cart)
+
         if not cart_items.exists():
             messages.error(request, "Không có sản phẩm nào trong giỏ hàng.")
-            return redirect('cart')  # Quay lại giỏ hàng nếu không có sản phẩm
+            return redirect('cart')  # Redirect to cart if no items exist
+
         if request.method == "POST":
-            # Lấy dữ liệu từ form
+            # Gather data from the form
             name = request.POST.get("name")
             email = request.POST.get("email")
             address = request.POST.get("address")
@@ -29,53 +40,29 @@ def checkout(request):
             country = request.POST.get("country")
             mobile = request.POST.get("mobile")
             payment_method = request.POST.get("payment_method")
-            cart_id=_cart_id(request)
-            print(request.user)  # Thông báo khi nhận POST
-            print(cart_id)  # Thông báo khi nhận POST
-            if Cart.objects.filter(cart_id=cart_id).exists():
-                print(cart_id) 
-                cart = Cart.objects.get(cart_id=cart_id)
-            else:
-                print(cart_id) 
-                print("check không")
-                new_cart_id = str(uuid.uuid4())  # Tạo UUID mới
-                request.session['cart_id'] = new_cart_id  # Lưu vào session
-                cart = Cart.objects.create(cart_id=new_cart_id)
-            # print(cart)  # Thông báo khi nhận POST
-            # Tạo đơn hàng
-            print("check")
+
+            # Create a new order
             order = Order.objects.create(
                 user=request.user,
                 cart=cart,
                 status="processing",
             )
 
-            # Cập nhật trạng thái giỏ hàng (vô hiệu hóa)
-            cart.save()
-
-            # Lưu lịch sử đơn hàng
+            # Save order history
             OrderHistory.objects.create(
                 user=request.user,
                 order=order,
                 status="processing",
             )
 
-            new_cart_id = str(uuid.uuid4())  # Tạo UUID mới
-            request.session['cart_id'] = new_cart_id  # Lưu vào session
-            
-            # Tạo một giỏ hàng mới trong cơ sở dữ liệu
-            Cart.objects.create(cart_id=new_cart_id)
-            cart_items.delete()
-            print("Nhận Thông tin 2")  # Thông báo khi nhận POST
-            # Chuyển hướng đến trang xác nhận
+            # Redirect to the order confirmation page
+            messages.success(request, "Thanh toán thành công, đơn hàng của bạn đã được tạo!")
             return redirect('order_confirmation')
 
-        # Tính tổng giá trị đơn hàng
+        # Calculate total cost and quantity
         total = sum(item.product.price * item.quantity for item in cart_items)
         total_quantity = sum(item.quantity for item in cart_items)
 
-
-        # Render trang checkout
         context = {
             'cart_items': cart_items,
             'total': total,
@@ -84,25 +71,33 @@ def checkout(request):
 
         return render(request, 'checkout.html', context)
 
+    except Cart.DoesNotExist:
+        return redirect('checkout')  # Redirect to checkout if cart does not exist
     except Exception as e:
+        # Log the error for debugging
+        print(f"Checkout error: {str(e)}")
         messages.error(request, "Đã xảy ra lỗi trong quá trình thanh toán.")
-        return redirect('cart')  # Quay lại giỏ hàng trong trường hợp lỗi
-
+        return redirect('cart')  # Redirect to cart in case of error
 
 # @login_required(login_url='login')
 def order_confirmation(request):
-    """Render a generic confirmation page."""
+    """
+    Hàm hiển thị form confirm hóa đơn.
+    """
     return render(request, 'order_confirmation.html')
     
 def redirect_to_checkout_or_login(request):
-    """Redirect users to the checkout if logged in, or to login if not."""
+    """
+    Hàm điều hướng người dùng đến page checkout hoặc login
+    """
     if request.user.is_authenticated:
-        return redirect('checkout')  # Replace 'checkout' with the actual URL name for your checkout view
-    return redirect('login')  # Replace 'login' with the actual URL name for your login view
-
+        return redirect('checkout')
+    return redirect('login')
 
 def payment_view(request):
-    """Handle payment view."""
+    """
+    Hàm trả về payment view (phiên bản cũ của hàm checkout, không còn sử dụng)
+    """
     try:
         if request.user.is_authenticated:
             cart = Cart.objects.filter(cartitem__user=request.user).distinct().first()
@@ -141,16 +136,19 @@ def payment_view(request):
     except ObjectDoesNotExist:
         return redirect('checkout')
 
-
 @login_required(login_url='login')
 def order_history(request):
-    """Display the order history for the user."""
+    """
+    Hàm lấy lịch sử 
+    """
     history = OrderHistory.objects.filter(user=request.user).order_by('-updated_at')
     return render(request, 'order_history.html', {'history': history})
 
 
 @login_required(login_url='login')
 def order_detail(request, order_id):
-    """Display detailed order information."""
+    """
+    Hàm hiển thị chi tiết hóa đơn
+    """
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'order_detail.html', {'order': order})

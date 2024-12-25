@@ -3,10 +3,21 @@ from .forms import RegisterForms, LoginForms, ProfileUpdateForm
 from django.contrib.auth import authenticate as default_authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from cart.views import _cart_id, merge_cart_items
+from cart.models import CartItem
 
 User = get_user_model()
 
 def authenticate(username=None, password=None):
+    '''
+    Hàm xác thực cho người dùng
+
+    Args:
+        - username (str): username hoặc email của người dùng
+        - password (str): mật khẩu của người dùng
+    Output:
+        - Kiểm tra người dùng nhập đúng thông tin xác thực
+    '''
     if username and password:
         try:
             # Check for either username or email
@@ -22,6 +33,16 @@ def authenticate(username=None, password=None):
     return None
 
 def register_view(request):
+    '''
+    Hàm hiển thị nội dung đăng ký và tạo người dùng
+
+    Args:
+        - request (dict): Chứa thông tin từ form (username, email, first_name, last_name, password)- 
+
+    Output:
+        -  Render form khi chưa nhập thông tin theo template register.html và tạo người dùng khi đã nhập thông tin
+
+    '''
     success_message = ""
     error_message = ""
 
@@ -44,11 +65,10 @@ def register_view(request):
                 )
                 user.save()
                 success_message = "Registration successful! You can now log in."
-                login(request, user)             
-                cart_id = request.session.get('cart_id')
-                if cart_id:
-                    request.session['cart_id'] = cart_id
-                return redirect('profile')
+                login(request, user)
+                merge_cart_items(request)
+                next_url = request.session.pop('next', 'profile')
+                return redirect(next_url)
 
             except Exception as e:
                 error_message = f"Error: {str(e)}"
@@ -65,6 +85,16 @@ def register_view(request):
     })
     
 def login_view(request):
+    '''
+    Hàm hiển thị nội dung đăng nhập, đăng nhập và merge giỏ hàng
+
+    Args:
+        - request (dict): Chứa thông tin từ form (username, password)-, các thông tin cart (cart_id)
+
+    Output:
+        - Render form khi chưa nhập thông tin theo template login.html, đăng nhập và merge giỏ hàng nếu đã nhập.
+
+    '''
     if request.method == 'POST':
         form = LoginForms(request.POST)
         if form.is_valid():
@@ -74,10 +104,7 @@ def login_view(request):
             user = authenticate(username=username_or_email, password=password)
             if user is not None:
                 login(request, user)
-                cart_id = request.session.get('cart_id')
-                if cart_id:
-                    request.session['cart_id'] = cart_id
-                # Redirect back to the cart if coming from checkout
+                merge_cart_items(request)
                 next_url = request.session.pop('next', 'profile')
                 return redirect(next_url)
             else:
@@ -93,14 +120,22 @@ def login_view(request):
 
 @login_required(login_url='login')
 def profile_view(request):
+    '''
+    Hàm hiển thị profile người dùng
+    
+    Args: 
+        - request (dict): Lấy user hiện tại để truy cập các đơn hàng (tôngr số đơn hàng, ...).
+    Output:
+        - render trang profile theo template profile.html
+    '''
     if request.role not in ['Admin', 'User']:
         return redirect('login')
 
     orders = request.user.get_orders()
-    total_products_bought = sum(order_item.quantity for order in orders 
-                                                        for order_item in order.items.all())
+    total_products_bought = sum(cart_item.quantity for order in orders for cart_item in order.cart.items.all())
+
     completed_orders = orders.filter(status='completed')[:5]
-    pending_orders = orders.filter(status='in_progress')
+    pending_orders = orders.filter(status='processing')[:5]
     total_orders = orders.count()
 
     return render(request, 'profile.html', {
@@ -112,6 +147,16 @@ def profile_view(request):
 
 @login_required(login_url='login')
 def profile_update(request):
+    '''
+    Hàm hiển thị nội dung thay đổi profile
+
+    Args:
+        - request (dict): Chứa thông tin từ form (first_name, last_name)
+
+    Output:
+        - Render form khi chưa nhập thông tin theo template profile_update.html, thay đổi thông tin người dùng.
+
+    '''
     if request.role not in ['Admin', 'User']:
         return redirect('login')
 
@@ -127,5 +172,14 @@ def profile_update(request):
     return render(request, 'profile_update.html', {'form': form})
 
 def logout_view(request):
+    '''
+    Hàm đăng xuất
+    
+    Args:
+        - request (dict): chứa user hiện tại
+
+    Output:
+        - Đăng xuất và điều hướng người dùng đến trang login.
+    '''
     logout(request)
     return redirect('login')

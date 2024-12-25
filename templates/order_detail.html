@@ -14,9 +14,9 @@
     <h4>Danh sách sản phẩm</h4>
     <ul>
         {% for item in order.cart.items.all %}
-        <li>{{ item.product.name }} - {{ item.quantity }} x ${{ item.product.price }}</li>
+        <li>{{ item.product.name }} - {{ item.quantity }} x {{ item.product.price }} VND</li>
         {% endfor %}
     </ul>
-    <p><strong>Tổng cộng:</strong> ${{ order.get_total }}</p>
+    <p><strong>Tổng cộng:</strong> {{ order.get_total }} VND</p>
 </div>
 {% endblock %}

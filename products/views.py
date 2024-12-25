@@ -7,6 +7,17 @@ from django.db.models import Q
 
 
 def product_list(request, category_slug=None):
+    '''
+    Hàm hiển thị danh sách sản phẩm đã được lọc (theo color, material, product_type)
+
+    Args:
+        - request.GET (dict): Thông tin của filter form (color, material, product_type)
+        - category_slug (str): slug danh mục lấy từ url
+
+    Output:
+        - render các sản phẩm tìm được theo template product.html
+        
+    '''
     category = None
     categories = Category.objects.all()  # Lấy tất cả danh mục
     products = Product.objects.filter(stock__gt=0)  # Chỉ lấy sản phẩm còn hàng
@@ -42,21 +53,38 @@ def product_list(request, category_slug=None):
 
     return render(request, 'products.html', context)
 
-
-
 def product_detail(request, product_slug):
+    '''
+    Hàm hiển thị thông tin chi tiết sản phẩm
+
+    Args:
+        - request (dict): các thông tin yêu cầu
+        - product_slug: slug sản phẩm lấy từ url
+    Output:
+        - render chi tiết sản phẩm theo template product_detail.html
+    '''
     product = Product.objects.get(slug=product_slug)
     context = {'product': product}
     return render(request, 'product_detail.html', context)
 
 def index(request):
+    
     products = Product.objects.all()  # Hoặc query phù hợp với ứng dụng của bạn
     categories = Category.objects.all()  # Nếu bạn cũng muốn truyền các danh mục
     return render(request, 'index.html', {'products': products, 'categories': categories})
 
 class ProductsView(View):
-    
     def get(self, request):
+        '''
+        Hàm hiển thị danh sách sản phẩm đã được lọc (theo color, material, product_type, query, min_price, max_price)
+
+        Args:
+            - request (dict): Thông tin của filter form (color, material, product_type, query, min_price, max_price )
+
+        Output:
+            - render các sản phẩm tìm được theo template products.html
+            
+        '''
         products = Product.objects.filter(stock__gt=0)  # Lấy sản phẩm còn hàng
         categories = Category.objects.all()  # Lấy tất cả danh mục
 
